@@ -1,3 +1,4 @@
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -12,21 +13,57 @@ def read(path: Path) -> str:
 
 def old_identity_terms() -> list[str]:
     old_product = "Enterprise" + " Hub"
+    old_product_lower = "enterprise" + " hub"
     old_slug = "enterprise" + "-hub"
     old_snake = "enterprise" + "_hub"
+    old_compact = "enterprise" + "hub"
     old_typo = "enterprice" + "hub"
     old_tenant_en = "Mai" + "jia"
     old_tenant_slug = "mai" + "jia"
     old_tenant_zh = "麦" + "家"
     return [
         old_product,
+        old_product_lower,
         old_slug,
         old_snake,
+        old_compact,
         old_typo,
         old_tenant_en,
         old_tenant_slug,
         old_tenant_zh,
     ]
+
+
+def tracked_repository_text_files() -> list[Path]:
+    completed = subprocess.run(
+        ["git", "ls-files", "-z"],
+        cwd=ROOT,
+        check=True,
+        stdout=subprocess.PIPE,
+    )
+    paths = []
+    for raw_path in completed.stdout.decode("utf-8").split("\0"):
+        if not raw_path:
+            continue
+
+        path = Path(raw_path)
+        parts = set(path.parts)
+        suffix = path.suffix.lower()
+
+        # These are not current repository prose/source contract surfaces.
+        if parts & {".git", ".worktrees", ".cache", "__pycache__"}:
+            continue
+        if suffix in {".pyc", ".pyo", ".png", ".jpg", ".jpeg", ".gif", ".ico", ".pdf"}:
+            continue
+
+        full_path = ROOT / path
+        try:
+            full_path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        paths.append(full_path)
+
+    return paths
 
 
 class SmedcSkillContractTests(unittest.TestCase):
@@ -84,10 +121,22 @@ class SmedcSkillContractTests(unittest.TestCase):
                 self.assertIn("smedc-mcp-launcher@0.5.0", content)
                 self.assertIn("SMEDC_BASE_URL=https://api.smedatacenter.xyz", content)
 
-    def test_old_current_identities_are_absent_from_current_docs(self) -> None:
-        for term in old_identity_terms():
-            with self.subTest(term=term):
-                self.assertNotIn(term, self.current_text)
+    def test_old_current_identities_are_absent_from_tracked_text_files(self) -> None:
+        matches: list[str] = []
+
+        for path in tracked_repository_text_files():
+            relative_path = path.relative_to(ROOT)
+            text = path.read_text(encoding="utf-8")
+            for line_number, line in enumerate(text.splitlines(), start=1):
+                for term in old_identity_terms():
+                    if term in line:
+                        matches.append(f"{relative_path}:{line_number}: {term}")
+
+        self.assertEqual(
+            [],
+            matches,
+            "Old product, Skill, package, env, MCP, or tenant names remain.",
+        )
 
 
 if __name__ == "__main__":
