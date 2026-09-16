@@ -14,6 +14,26 @@ Those service responsibilities remain in
 > boundary are deployed together and independently verified. Real employee login and backend
 > authorization are still required.
 
+## Installation Profiles
+
+### Core-only install
+
+This is the default profile. Install only `enterprise-hub-mcp` for launcher setup, browser login,
+uploads, and authorization-safe Enterprise Hub queries. Optional business-reporting skills are not
+required for ordinary Enterprise Hub work and are never installed silently by a core install or
+update.
+
+### Optional companion: Maijia reports
+
+Install [`maijia-business-analyses-smedc`](https://github.com/YinXiaoyu-1998/maijia-business-analyses-smedc)
+only for Maijia operating diagnoses, weekly reports, or monthly reports. It remains an independent
+skill and requires this core skill for launcher installation, authentication, and data access.
+
+If the companion is absent, an agent may identify the official source and offer to install it, but
+the employee must explicitly authorize that installation or request the named companion or all
+recommended companions. Follow the companion repository's installation instructions after the
+core skill is installed. Installing or updating either repository does not update the other.
+
 ## Install The Skill
 
 Clone or download this repository, then install the skill to the canonical current-user skill

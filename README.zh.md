@@ -11,6 +11,24 @@ storage、Docker、worker、云资源或部署。服务职责仍属于主项目
 > 在线服务状态：`enterprise-hub-mcp-launcher@0.4.0`、浏览器登录和公开 HTTPS MCP 边界已一同部署并
 > 独立验证。员工仍需完成真实登录与后端授权。
 
+## 安装档位
+
+### 仅安装核心
+
+这是默认档位。只安装 `enterprise-hub-mcp`，用于 launcher 配置、浏览器登录、文件上传和遵守授权边界的
+Enterprise Hub 查询。普通 Enterprise Hub 工作不需要安装任何可选业务报表 skill，安装或更新核心 skill
+时也绝不静默安装这些配套能力。
+
+### 可选配套：麦家经营报表
+
+只有在需要麦家经营诊断、周报或月报时，才安装
+[`maijia-business-analyses-smedc`](https://github.com/YinXiaoyu-1998/maijia-business-analyses-smedc)。
+它保持为独立 skill，并依赖本核心 skill 完成 launcher 安装、认证和数据访问。
+
+如果尚未安装，agent 可以说明其官方来源并提出安装，但员工必须明确同意安装，或已经明确要求安装
+这个具名配套 skill / 全部推荐配套 skill。先安装核心 skill，再按配套仓库的安装说明操作。安装或更新
+任意一边都不会自动更新另一边。
+
 ## 安装 Skill
 
 clone 或下载本仓库后，把 skill 安装到当前用户的 canonical skill 目录。不要默认安装到
