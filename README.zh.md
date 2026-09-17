@@ -1,248 +1,126 @@
-# Enterprise Hub MCP Skill
+# SMEDC MCP Skill
 
-这是员工自有 agent 安装和使用 Enterprise Hub 远程 MCP launcher 的正式运行手册。它使用
-浏览器登录和正式服务地址 `https://api.smedatacenter.xyz`；员工绝不通过 agent 提供密码、token
-或授权码。
+这是员工自有 agent 安装和使用 SMEDC 远程 MCP launcher 的正式运行手册。SMEDC 是 Small and
+Medium Enterprises Data Center 的缩写。它使用浏览器登录和正式服务地址
+`https://api.smedatacenter.xyz`；员工绝不通过 agent 提供密码、token 或授权码。
 
-本仓库只包含 skill 与 MCP 客户端连接说明；不操作 Enterprise Hub 的 API、数据库、Qdrant、
-storage、Docker、worker、云资源或部署。服务职责仍属于主项目
-[SME_DATA_CENTER](https://github.com/YinXiaoyu-1998/SME_DATA_CENTER)。
+本仓库只包含 skill 与 MCP 客户端连接说明；不操作 SMEDC 的 API、数据库、向量库、storage、
+Docker、worker、云资源或部署。
 
-> 在线服务状态：`enterprise-hub-mcp-launcher@0.4.0`、浏览器登录和公开 HTTPS MCP 边界已一同部署并
-> 独立验证。员工仍需完成真实登录与后端授权。
+> 在线服务状态：`smedc-mcp-launcher@0.5.0`、浏览器登录和公开 HTTPS MCP 边界是当前打包契约。
+> 员工仍需完成真实登录与后端授权。
 
 ## 安装档位
 
 ### 仅安装核心
 
-这是默认档位。只安装 `enterprise-hub-mcp`，用于 launcher 配置、浏览器登录、文件上传和遵守授权边界的
-Enterprise Hub 查询。普通 Enterprise Hub 工作不需要安装任何可选业务报表 skill，安装或更新核心 skill
-时也绝不静默安装这些配套能力。
+这是默认档位。只安装 `smedc-mcp`，用于 launcher 配置、浏览器登录、文件上传和遵守授权边界的
+SMEDC 查询。普通 SMEDC 工作不需要安装任何可选配套 skill，安装或更新核心 skill 时也绝不静默安装
+这些配套能力。
 
-### 可选配套：麦家经营报表
+### 可选配套
 
-只有在需要麦家经营诊断、周报或月报时，才安装
-[`maijia-business-analyses-smedc`](https://github.com/YinXiaoyu-1998/maijia-business-analyses-smedc)。
-它保持为独立 skill，并依赖本核心 skill 完成 launcher 安装、认证和数据访问。
+两个配套 skill 都在
+[`YinXiaoyu-1998/smedc-companion-skills`](https://github.com/YinXiaoyu-1998/smedc-companion-skills)
+中，并保持为独立安装的 skill：
 
-如果尚未安装，agent 可以说明其官方来源并提出安装，但员工必须明确同意安装，或已经明确要求安装
-这个具名配套 skill / 全部推荐配套 skill。先安装核心 skill，再按配套仓库的安装说明操作。安装或更新
-任意一边都不会自动更新另一边。
+- `smedc-business-analysis` 生成基于组织名称的经营诊断、周报和月报。
+- `smedc-delivery-ledger` 渲染标准进货台帐表、导出批准的 CSV，并指导收货单关联的检疫证明照片操作。
+
+如果尚未安装，agent 可以说明其官方来源并提出安装，但员工必须明确同意安装，或已经明确要求安装这个
+具名配套 skill / 全部推荐配套 skill。安装或更新任意一边都不会自动更新另一边。
 
 ## 安装 Skill
 
 clone 或下载本仓库后，把 skill 安装到当前用户的 canonical skill 目录。不要默认安装到
 `~/.codex/skills`。
 
-| 平台             | Canonical target                                  |
-| ---------------- | ------------------------------------------------- |
-| macOS/Linux-like | `~/.agents/skills/enterprise-hub-mcp`             |
-| Windows          | `%USERPROFILE%\.agents\skills\enterprise-hub-mcp` |
+| 平台             | Canonical target                         |
+| ---------------- | ---------------------------------------- |
+| macOS/Linux-like | `~/.agents/skills/smedc-mcp`             |
+| Windows          | `%USERPROFILE%\.agents\skills\smedc-mcp` |
 
 macOS/Linux-like shell：
 
 ```sh
 mkdir -p "$HOME/.agents/skills"
-SKILL_TARGET="$HOME/.agents/skills/enterprise-hub-mcp"
+SKILL_TARGET="$HOME/.agents/skills/smedc-mcp"
 if [ -e "$SKILL_TARGET" ]; then
   mv "$SKILL_TARGET" "$SKILL_TARGET.bak.$(date +%Y%m%d%H%M%S)"
 fi
-cp -R skills/enterprise-hub-mcp "$SKILL_TARGET"
+cp -R skills/smedc-mcp "$SKILL_TARGET"
 ```
 
 Windows PowerShell：
 
 ```powershell
 $SkillRoot = Join-Path $env:USERPROFILE ".agents\skills"
-$SkillTarget = Join-Path $SkillRoot "enterprise-hub-mcp"
+$SkillTarget = Join-Path $SkillRoot "smedc-mcp"
 New-Item -ItemType Directory -Force -Path $SkillRoot | Out-Null
 if (Test-Path $SkillTarget) {
   Move-Item $SkillTarget "$SkillTarget.bak.$(Get-Date -Format yyyyMMddHHmmss)"
 }
-Copy-Item -Recurse "skills\enterprise-hub-mcp" $SkillTarget
+Copy-Item -Recurse "skills\smedc-mcp" $SkillTarget
 ```
 
 安装后重启 Codex 或新开任务，使 skill 列表刷新。
 
 ## 更新 Skill 本体
 
-直接对 agent 说：“帮我更新 enterprise-hub-mcp-skill 这个 skill。”新版 skill 同时识别
-`enterprise-hub-mcp` 和 `enterprise-hub-mcp-skill`，会从
-[本官方仓库](https://github.com/YinXiaoyu-1998/enterprise-hub-mcp-skill)的默认分支获取最新内容，
-备份、替换并校验完整 skill 目录，不依赖推荐市场。完成后会报告来源 commit 和安装路径；
-如有需要，再刷新或重启 agent。
+直接对 agent 说：“帮我更新 smedc-mcp-skill 这个 skill。”新版 skill 同时识别 `smedc-mcp` 和
+`smedc-mcp-skill`，会从
+[`YinXiaoyu-1998/smedc-mcp-skill`](https://github.com/YinXiaoyu-1998/smedc-mcp-skill)
+的默认分支获取最新内容，备份、替换并校验完整 skill 目录，不依赖推荐市场。完成后会报告来源 commit
+和安装路径；如有需要，再刷新或重启 agent。
 
-旧副本如果还没有更新说明，首次请这样说：“请从
-https://github.com/YinXiaoyu-1998/enterprise-hub-mcp-skill 的最新默认分支，
-用完整的 skills/enterprise-hub-mcp 目录更新我已安装的 enterprise-hub-mcp skill。”
-
-只更新 skill 会保留 launcher 和登录会话。升级 launcher 需要用户提出该请求，并使用更新后的
-官方 skill 所批准的精确版本。agent 仍需具备网络访问、目录写入权限及宿主支持的安装方式。
-详见 [skill 更新流程](skills/enterprise-hub-mcp/references/update-skill.md)。
+只更新 skill 会保留 launcher 和登录会话。升级 launcher 需要用户提出该请求，并使用更新后的官方 skill
+所批准的精确版本。agent 仍需具备网络访问、目录写入权限及宿主支持的安装方式。详见
+[skill 更新流程](skills/smedc-mcp/references/update-skill.md)。
 
 ## 正式 Launcher
 
-唯一批准的 launcher 包是 `enterprise-hub-mcp-launcher@0.4.0`。禁止使用 npm `latest`、
-未固定版本或 launcher 自更新。
+唯一批准的 launcher 包是 `smedc-mcp-launcher@0.5.0`。禁止使用 npm `latest`、未固定版本或
+launcher 自更新。
 
-先运行 `node --version` 和 `npm --version`。必须使用 Node.js **22 或更高版本**并确保 npm 可用。
-Node.js 不存在或 major version 小于 22 时，先为当前用户安装/升级，再安装 launcher。
-
-| 平台    | 当前 OS 用户的包目录                                                    |
-| ------- | ----------------------------------------------------------------------- |
-| macOS   | `~/Library/Application Support/Enterprise Hub/launcher/versions/0.4.0/` |
-| Windows | `%LOCALAPPDATA%\\Enterprise Hub\\launcher\\versions\\0.4.0\\`           |
-
-经授权的员工自有 agent 用以下命令幂等安装或修复：
+先运行 `node --version` 和 `npm --version`。必须使用 Node.js 22 或更高版本并确保 npm 可用。经授权的
+员工自有 agent 用以下命令幂等安装或修复：
 
 ```sh
-npm install --prefix "<launcher-directory>" --save-exact enterprise-hub-mcp-launcher@0.4.0
+npm install --prefix "<launcher-directory>" --save-exact smedc-mcp-launcher@0.5.0
 ```
 
 agent 必须运行对应平台的精确自检，才能声明安装成功：
 
 ```sh
-ENTERPRISE_HUB_BASE_URL=https://api.smedatacenter.xyz \
-  "$HOME/Library/Application Support/Enterprise Hub/launcher/versions/0.4.0/node_modules/.bin/enterprise-hub-mcp-launcher" self-check
+SMEDC_BASE_URL=https://api.smedatacenter.xyz \
+  "$HOME/Library/Application Support/SMEDC/launcher/versions/0.5.0/node_modules/.bin/smedc-mcp-launcher" self-check
 ```
 
 ```powershell
-$env:ENTERPRISE_HUB_BASE_URL = "https://api.smedatacenter.xyz"
-& "$env:LOCALAPPDATA\Enterprise Hub\launcher\versions\0.4.0\node_modules\.bin\enterprise-hub-mcp-launcher.cmd" self-check
+$env:SMEDC_BASE_URL = "https://api.smedatacenter.xyz"
+& "$env:LOCALAPPDATA\SMEDC\launcher\versions\0.5.0\node_modules\.bin\smedc-mcp-launcher.cmd" self-check
 ```
 
-self-check 只返回安全的 machine-readable 字段：`ok`、`launcherVersion`、`serviceOrigin`、
-`platform`、`secureStore.{available,durableCredentialPresent}`、
-`server.{reachable,metadataCompatible,minimumLauncherVersion,recommendedLauncherVersion,recommendedUpdateAvailable}`
-以及 `mcp.handshake`（`ok`、`not_authenticated` 或 `unavailable`）。launcher 不会自更新。批准
-更新时使用新的精确版本目录，只改调用该 agent 的 MCP launcher 路径，并保留操作系统安全会话。
+self-check 只返回安全的 machine-readable 字段，且 launcher 不会自更新。批准更新时使用新的精确版本
+目录，只改调用该 agent 的 MCP launcher 路径，并保留操作系统安全会话。
 
 ## 配置与登录
 
-把 Enterprise Hub 配置成**本地 stdio launcher**，不要配置成直连远程 HTTP/OAuth 服务。launcher
-连接 `https://api.smedatacenter.xyz`、打开系统浏览器供员工登录，并只在 macOS Keychain 或 Windows
-Credential Manager 中保存 durable credential。配置、环境变量、命令参数、文件、日志和聊天内容
-不得包含密码、token、授权码、原始 header 或 OAuth secret。
+把 SMEDC 配置成本地 stdio launcher，名称为 `smedc`，不要配置成直连远程 HTTP/OAuth 服务。完整 launch
+tuple 只有一个 `serve` 参数和一个非秘密环境变量：`SMEDC_BASE_URL=https://api.smedatacenter.xyz`。
 
-完整 stdio launch tuple 是固定的：只有一个 `serve` 参数和一个非秘密环境变量；不得添加工作目录、
-其他环境变量或任何凭证。
+修改 MCP 客户端前，先检查现有配置并创建带时间戳的备份。只添加或替换它的 `smedc` stdio entry，保留
+所有无关 server 与设置。
 
-| 平台    | Command                                                                                                              | Args    | Env                                                     |
-| ------- | -------------------------------------------------------------------------------------------------------------------- | ------- | ------------------------------------------------------- |
-| macOS   | `~/Library/Application Support/Enterprise Hub/launcher/versions/0.4.0/node_modules/.bin/enterprise-hub-mcp-launcher` | `serve` | `ENTERPRISE_HUB_BASE_URL=https://api.smedatacenter.xyz` |
-| Windows | `%LOCALAPPDATA%\\Enterprise Hub\\launcher\\versions\\0.4.0\\node_modules\\.bin\\enterprise-hub-mcp-launcher.cmd`     | `serve` | `ENTERPRISE_HUB_BASE_URL=https://api.smedatacenter.xyz` |
+认证状态未知时调用 `smedc_auth_status`。若返回 `authentication_required`，调用 `smedc_login`，只请员工
+在浏览器页面完成登录。成功后只重试原业务操作一次。仅在员工要求退出时调用 `smedc_logout`。
 
-修改 MCP 客户端前，先检查现有配置并创建带时间戳的备份。只添加或替换它的 `enterprise-hub`
-stdio entry，保留所有无关 server 与设置。
-
-- Codex：使用已验证的 `codex mcp list|get|add|remove` CLI。macOS 从 PATH 解析 `codex`，不存在时
-  使用 `/Applications/ChatGPT.app/Contents/Resources/codex`；Windows 从 PATH 解析
-  `codex.exe`。修改前备份 `~/.codex/config.toml` 或
-  `%USERPROFILE%\.codex\config.toml`。用
-  `codex mcp add --env ENTERPRISE_HUB_BASE_URL=https://api.smedatacenter.xyz enterprise-hub -- <platform-launcher-path> serve`
-  添加 stdio entry，再用 `codex mcp get enterprise-hub --json` 和 self-check 验证。修复时只删除
-  mismatch 的 `enterprise-hub` entry 后重新添加；单 agent 移除使用
-  `codex mcp remove enterprise-hub`，然后以 `codex mcp list --json` 和 get absent 验证。
-- OpenClaw：新 entry 用 `openclaw mcp add`，最小幂等替换用 `openclaw mcp set`，再以
-  `openclaw mcp doctor enterprise-hub --probe` 验证。macOS 的 add 形式是
-  `openclaw mcp add enterprise-hub --command "$HOME/Library/Application Support/Enterprise Hub/launcher/versions/0.4.0/node_modules/.bin/enterprise-hub-mcp-launcher" --arg serve --env ENTERPRISE_HUB_BASE_URL=https://api.smedatacenter.xyz`。
-  不要用 `openclaw mcp login` 或 `openclaw mcp logout`：它们管理 OpenClaw 的直连 HTTP OAuth
-  store，而 Enterprise Hub 的浏览器登录和安全存储由 launcher 管理。
-- 其他 agent：采取受保护的自适应发现——检查产品 help 与当前配置、先备份、只加固定本地 stdio
-  entry 并验证握手。不要破坏性猜测，也不要配置直连 OAuth。
-
-认证状态未知时调用 `enterprise_hub_auth_status`。若返回 `authentication_required`，调用
-`enterprise_hub_login`，只请员工在浏览器页面完成登录。成功后只重试原业务操作一次。仅在员工
-要求退出时调用 `enterprise_hub_logout`；它会让同一 OS 用户安全存储下的所有本地 Enterprise Hub
-agent 退出。
-
-员工询问当前登录的是哪个 Enterprise Hub 账号时，调用零参数
-`enterprise_hub_get_current_user`。它只返回当前已认证员工的 `displayName`、`email` 和 `role`，
-不接受账号选择器，也不暴露内部 ID、labels 或凭证。
-
-## 结构化数据指引
-
-使用数据集前先调用 `list_structured_datasets`，只使用发现结果声明的数据集、字段、operator 和
-capabilities。字段的 `canonicalName` 才是结构化查询里的合法字段名；`sourceColumn` 和 `aliases`
-只用于把员工说法或来源表头映射到 canonical 字段，或在展示结果时使用更友好的表头。
-
-当员工需要判断某个数据集当前有哪些可读 applied 来源、查询范围是否足够时，调用
-`describe_structured_dataset_coverage`。coverage 只返回来源事实：window 数据集返回可读导入时间窗，
-snapshot 数据集返回可读快照，没有查询范围 metadata 的数据集返回空 sources。是否足够支持当前问题由
-client 自己判断并说明假设，不是服务端业务结论。
-
-`business` 和 `dishes` 使用 launcher 0.4.0 的分区流程。通过
-`upload_structured_dataset` 以 `file.encoding:"path"` 一次提交原始 CSV/XLSX、企业名、完整日期范围和
-幂等键；launcher 会流式上传最大 2 GiB 的源文件，agent 不得手工切分或改写。使用
-`get_partition_import_status` 轮询至 `published`。分析时先看 coverage，再调用
-`download_structured_partitions`；launcher 只返回已校验的本地 CSV 路径，不暴露预签名 URL，调用方须在
-`finally` 中删除该精确 scratch 目录。`query_structured_dataset` 会有意拒绝这两个 dataset。
-
-结构化查询是受控只读 JSON 请求，不是 SQL。detail 查询返回选定 canonical 字段；aggregate 查询只能使用
-显式机械聚合：`count`、`countDistinct`、`sum`、`avg`、`min`、`max` 和 `weightedAvg`。最多用四个
-canonical 字段分组、十二个聚合输出；聚合排序字段必须是本次请求的 group-by 字段或聚合 alias。
-`weightedAvg` 的 `field` 与 `weightField` 必须是同一数据集中可聚合的数值 canonical 字段，总权重为
-零或缺失时返回 `null`。
-
-对于 `delivery_ledger` 和 `supplier_catalog`，上传 CSV/XLSX 时传入 `enterpriseName`、
-`idempotencyKey`、`labelKeys`，不要传任何日期字段。每个 delivery 文件只能代表一张收货单，收货单号和
-日期从文件内容派生；每个 supplier 文件必须是一份完整当前快照，不是增量或分片。上传后轮询
-`get_import_status`，直到 `importBatch.status=applied` 再查询。
-
-最新一次成功 applied 的供应商快照才是当前 enrichment 来源。delivery 查询可以选择动态电话/地址
-字段，但除非 discovery 明确声明支持，不能用它们过滤、排序、分组或聚合；没有可见当前目录、没有
-精确匹配、源值为空或名称歧义时，字段可以为 `null`。不得回退到旧目录。
-
-检疫证明上传使用 `upload_quarantine_certificate`，每次调用只上传一张 JPG/JPEG/PNG 图片，并用
-`receiptId` 关联收货单。查询证明时只能显式传入 `receiptIds`；员工需要原始文件时，用返回的
-`sourceDocumentId` 调用 `get_source_document_download_url`。
-
-## 安全使用
-
-- 可见组织、标签和资源完全由后端授权决定，不依赖客户端过滤。不得传入组织 ID，也不得推断
-  隐藏数据。
-- 优先使用 path-mode 上传，由 launcher 读取用户选择文件的精确原始字节。不得规范化或重建内容。
-- 可轮询状态，但不得启动 worker 或操作服务基础设施。
-- 仅对完全相同的导入重放复用 structured-import idempotency key。import-status 404 只能视为
-  不可见或不存在。
-- 对同一 query/filter/limit 原样使用 evidence cursor。`INVALID_CURSOR` 时重新开始；
-  `CURSOR_EXPIRED` 时说明已过期，且只有员工仍想继续才重新搜索。
-- Skill Directory 只列出元数据；不得执行条目，也不得生成报告/dashboard。
-
-### 菜品目录快照
-
-只有 `list_structured_datasets` 发现结果明确提供 `dish_catalog` 时才可使用它。上传一份完整的
-CSV/XLSX 菜品目录快照，并传入 `snapshotDate: "YYYYMMDD"`；不得传 `startDate`/`endDate`，不得拆分或
-分块文件、只上传变更行，或把部分目录交给服务合并。快照过大时，应移除目录 schema 外的无关
-sheet/列、使用服务支持的更大限制，或寻求运营人员帮助。
-
-快照可以是历史快照，也可以乱序上传。不同内容的同日更正，必须先经授权维护路径归档已有快照；
-上传较新的快照不会替换旧历史。查询目录数据时，用发现结果提供的 `snapshot_date` 限定范围；不得
-推断最新/当前状态、差异，或跨快照的新增、删除、停售等状态。
-
-## 生命周期
-
-单 agent 移除时，备份该 agent 配置并只删它的 `enterprise-hub` entry。共享退出使用
-`enterprise_hub_logout`，或运行对应平台的精确命令：
-
-```sh
-ENTERPRISE_HUB_BASE_URL=https://api.smedatacenter.xyz \
-  "$HOME/Library/Application Support/Enterprise Hub/launcher/versions/0.4.0/node_modules/.bin/enterprise-hub-mcp-launcher" logout
-```
-
-```powershell
-$env:ENTERPRISE_HUB_BASE_URL = "https://api.smedatacenter.xyz"
-& "$env:LOCALAPPDATA\Enterprise Hub\launcher\versions\0.4.0\node_modules\.bin\enterprise-hub-mcp-launcher.cmd" logout
-```
-
-logout 只返回
-`{"remoteRevocationConfirmed":<boolean>,"localCredentialRemoved":<boolean>}`；远程可达时尝试撤销
-session family，并始终尝试删除本地 credential。只有 `localCredentialRemoved` 为 true 时才能报告
-本地退出成功。经明确授权的完全卸载：退出、从可安全发现的本地 agent 中移除 Enterprise Hub
-entries，并移除当前用户的 launcher 目录和非秘密 state。绝不移除 Node.js/npm、其他 MCP server、
-Employee Account 或服务端业务数据。
+员工询问当前登录的是哪个账号时，调用零参数 `smedc_get_current_user`。它返回当前已认证员工的
+`displayName`、`email`、`role`、`clearance` 和 `organizationName`。skill 目录工具是
+`smedc_list_skills`。
 
 ## 内容
 
-- `skills/enterprise-hub-mcp/SKILL.md`
-- `skills/enterprise-hub-mcp/agents/openai.yaml`
+- `skills/smedc-mcp/SKILL.md`
+- `skills/smedc-mcp/agents/openai.yaml`
+- `skills/smedc-mcp/references/update-skill.md`
