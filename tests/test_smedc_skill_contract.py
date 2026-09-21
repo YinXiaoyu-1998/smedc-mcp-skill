@@ -112,6 +112,12 @@ class SmedcSkillContractTests(unittest.TestCase):
         self.assertIn("Never install it silently", self.skill_text)
         self.assertIn("not required for ordinary SMEDC work", self.skill_text)
 
+    def test_evidence_answers_surface_every_automatic_source_link(self) -> None:
+        self.assertIn("search_document_evidence` already returns `sources[]", self.skill_text)
+        self.assertIn("show every entry", self.skill_text)
+        self.assertIn("Do not call `get_source_document_download_url` again", self.skill_text)
+        self.assertIn("SOURCE_DOWNLOAD_URL_UNAVAILABLE", self.skill_text)
+
     def test_install_guidance_uses_current_repository_and_skill_name(self) -> None:
         for content in [self.readme_text, self.readme_zh_text]:
             with self.subTest(language=content.splitlines()[0]):
