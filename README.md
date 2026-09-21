@@ -8,7 +8,7 @@ tokens, or authorization codes to an agent.
 This repository contains only skill and client-connection guidance. It never operates the SMEDC
 API, database, vector store, storage, Docker, worker, cloud resources, or deployment.
 
-> Live-service status: `smedc-mcp-launcher@0.5.0`, browser login, and the public HTTPS MCP
+> Live-service status: `smedc-mcp-launcher@0.5.1`, browser login, and the public HTTPS MCP
 > boundary are the current packaging contract. Real employee login and backend authorization are
 > still required.
 
@@ -85,26 +85,26 @@ the host's supported installation mechanism are still required. See the
 
 ## Official Launcher
 
-The only approved launcher package is `smedc-mcp-launcher@0.5.0`. Never use npm `latest`, an
+The only approved launcher package is `smedc-mcp-launcher@0.5.1`. Never use npm `latest`, an
 unpinned version, or launcher self-update.
 
 Run `node --version` and `npm --version` first. Node.js 22 or newer and a working npm are required.
 An authorized employee-owned agent installs or repairs it idempotently:
 
 ```sh
-npm install --prefix "<launcher-directory>" --save-exact smedc-mcp-launcher@0.5.0
+npm install --prefix "<launcher-directory>" --save-exact smedc-mcp-launcher@0.5.1
 ```
 
 The agent must run the exact platform self-check before claiming success:
 
 ```sh
 SMEDC_BASE_URL=https://api.smedatacenter.xyz \
-  "$HOME/Library/Application Support/SMEDC/launcher/versions/0.5.0/node_modules/.bin/smedc-mcp-launcher" self-check
+  "$HOME/Library/Application Support/SMEDC/launcher/versions/0.5.1/node_modules/.bin/smedc-mcp-launcher" self-check
 ```
 
 ```powershell
 $env:SMEDC_BASE_URL = "https://api.smedatacenter.xyz"
-& "$env:LOCALAPPDATA\SMEDC\launcher\versions\0.5.0\node_modules\.bin\smedc-mcp-launcher.cmd" self-check
+& "$env:LOCALAPPDATA\SMEDC\launcher\versions\0.5.1\node_modules\.bin\smedc-mcp-launcher.cmd" self-check
 ```
 
 Self-check returns only safe machine-readable fields and never self-updates. An approved update
