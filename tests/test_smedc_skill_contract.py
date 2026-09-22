@@ -128,6 +128,23 @@ class SmedcSkillContractTests(unittest.TestCase):
                 self.assertNotIn("smedc-mcp-launcher@0.5.0", content)
                 self.assertIn("SMEDC_BASE_URL=https://api.smedatacenter.xyz", content)
 
+    def test_linux_launcher_support_is_actionable_and_bounded(self) -> None:
+        linux_launcher_directory = (
+            "${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.5.1"
+        )
+
+        self.assertIn("macOS, Windows, or Linux", self.skill_text)
+        self.assertIn(linux_launcher_directory, self.skill_text)
+        self.assertIn(linux_launcher_directory, self.readme_text)
+        self.assertIn(linux_launcher_directory, self.readme_zh_text)
+        self.assertIn("headless Linux", self.skill_text)
+        self.assertIn("openedBrowser: false", self.skill_text)
+        self.assertIn("memory only", self.skill_text)
+        self.assertIn("launcher or host restart", self.skill_text)
+        self.assertIn("openclaw mcp add smedc", self.skill_text)
+        self.assertIn("Linux", self.readme_text)
+        self.assertIn("无头 Linux", self.readme_zh_text)
+
     def test_old_current_identities_are_absent_from_tracked_text_files(self) -> None:
         matches: list[str] = []
 

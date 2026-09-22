@@ -10,7 +10,8 @@ API, database, vector store, storage, Docker, worker, cloud resources, or deploy
 
 > Live-service status: `smedc-mcp-launcher@0.5.1`, browser login, and the public HTTPS MCP
 > boundary are the current packaging contract. Real employee login and backend authorization are
-> still required.
+> still required. The launcher supports macOS, Windows, and Linux; headless Linux uses the same
+> Device Authorization flow and falls back to a memory-only session when no secure store exists.
 
 ## Installation Profiles
 
@@ -95,6 +96,14 @@ An authorized employee-owned agent installs or repairs it idempotently:
 npm install --prefix "<launcher-directory>" --save-exact smedc-mcp-launcher@0.5.1
 ```
 
+Use the approved current-user launcher directory:
+
+| Platform | Launcher directory                                                    |
+| -------- | --------------------------------------------------------------------- |
+| macOS    | `~/Library/Application Support/SMEDC/launcher/versions/0.5.1/`        |
+| Windows  | `%LOCALAPPDATA%\\SMEDC\\launcher\\versions\\0.5.1\\`                  |
+| Linux    | `${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.5.1/` |
+
 The agent must run the exact platform self-check before claiming success:
 
 ```sh
@@ -107,9 +116,18 @@ $env:SMEDC_BASE_URL = "https://api.smedatacenter.xyz"
 & "$env:LOCALAPPDATA\SMEDC\launcher\versions\0.5.1\node_modules\.bin\smedc-mcp-launcher.cmd" self-check
 ```
 
+```sh
+# Linux
+SMEDC_LAUNCHER_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.5.1"
+SMEDC_BASE_URL=https://api.smedatacenter.xyz \
+  "$SMEDC_LAUNCHER_DIR/node_modules/.bin/smedc-mcp-launcher" self-check
+```
+
 Self-check returns only safe machine-readable fields and never self-updates. An approved update
 uses a new exact versioned directory, changes only the invoking agent's MCP launcher path, and
-preserves the operating-system secure session.
+preserves any operating-system secure session. On Linux, `secureStore.available:false` is supported:
+the launcher returns the first-party login link instead of opening a local browser when headless,
+keeps the resulting session in memory only, and requires login again after launcher or host restart.
 
 ## Configuration And Login
 
