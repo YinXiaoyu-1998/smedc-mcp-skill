@@ -8,7 +8,8 @@ Medium Enterprises Data Center 的缩写。它使用浏览器登录和正式服�
 Docker、worker、云资源或部署。
 
 > 在线服务状态：`smedc-mcp-launcher@0.5.1`、浏览器登录和公开 HTTPS MCP 边界是当前打包契约。
-> 员工仍需完成真实登录与后端授权。
+> 员工仍需完成真实登录与后端授权。launcher 支持 macOS、Windows 和 Linux；无头 Linux
+> 使用同一 Device Authorization 流程，无安全存储时回退为仅内存会话。
 
 ## 安装档位
 
@@ -89,6 +90,14 @@ launcher 自更新。
 npm install --prefix "<launcher-directory>" --save-exact smedc-mcp-launcher@0.5.1
 ```
 
+使用批准的当前用户 launcher 目录：
+
+| 平台    | Launcher 目录                                                         |
+| ------- | --------------------------------------------------------------------- |
+| macOS   | `~/Library/Application Support/SMEDC/launcher/versions/0.5.1/`        |
+| Windows | `%LOCALAPPDATA%\\SMEDC\\launcher\\versions\\0.5.1\\`                  |
+| Linux   | `${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.5.1/` |
+
 agent 必须运行对应平台的精确自检，才能声明安装成功：
 
 ```sh
@@ -101,8 +110,17 @@ $env:SMEDC_BASE_URL = "https://api.smedatacenter.xyz"
 & "$env:LOCALAPPDATA\SMEDC\launcher\versions\0.5.1\node_modules\.bin\smedc-mcp-launcher.cmd" self-check
 ```
 
+```sh
+# Linux
+SMEDC_LAUNCHER_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.5.1"
+SMEDC_BASE_URL=https://api.smedatacenter.xyz \
+  "$SMEDC_LAUNCHER_DIR/node_modules/.bin/smedc-mcp-launcher" self-check
+```
+
 self-check 只返回安全的 machine-readable 字段，且 launcher 不会自更新。批准更新时使用新的精确版本
-目录，只改调用该 agent 的 MCP launcher 路径，并保留操作系统安全会话。
+目录，只改调用该 agent 的 MCP launcher 路径，并保留可用的操作系统安全会话。Linux 上
+`secureStore.available:false` 是受支持的结果：无头环境不打开本地浏览器，而是返回第一方
+登录链接；完成后会话只保存在内存中，launcher 或主机重启后需重新登录。
 
 ## 配置与登录
 
