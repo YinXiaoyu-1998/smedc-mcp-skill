@@ -7,7 +7,7 @@ Medium Enterprises Data Center 的缩写。它使用浏览器登录和正式服�
 本仓库只包含 skill 与 MCP 客户端连接说明；不操作 SMEDC 的 API、数据库、向量库、storage、
 Docker、worker、云资源或部署。
 
-> 在线服务状态：`smedc-mcp-launcher@0.5.0`、浏览器登录和公开 HTTPS MCP 边界是当前打包契约。
+> 在线服务状态：`smedc-mcp-launcher@0.5.1`、浏览器登录和公开 HTTPS MCP 边界是当前打包契约。
 > 员工仍需完成真实登录与后端授权。
 
 ## 安装档位
@@ -79,26 +79,26 @@ Copy-Item -Recurse "skills\smedc-mcp" $SkillTarget
 
 ## 正式 Launcher
 
-唯一批准的 launcher 包是 `smedc-mcp-launcher@0.5.0`。禁止使用 npm `latest`、未固定版本或
+唯一批准的 launcher 包是 `smedc-mcp-launcher@0.5.1`。禁止使用 npm `latest`、未固定版本或
 launcher 自更新。
 
 先运行 `node --version` 和 `npm --version`。必须使用 Node.js 22 或更高版本并确保 npm 可用。经授权的
 员工自有 agent 用以下命令幂等安装或修复：
 
 ```sh
-npm install --prefix "<launcher-directory>" --save-exact smedc-mcp-launcher@0.5.0
+npm install --prefix "<launcher-directory>" --save-exact smedc-mcp-launcher@0.5.1
 ```
 
 agent 必须运行对应平台的精确自检，才能声明安装成功：
 
 ```sh
 SMEDC_BASE_URL=https://api.smedatacenter.xyz \
-  "$HOME/Library/Application Support/SMEDC/launcher/versions/0.5.0/node_modules/.bin/smedc-mcp-launcher" self-check
+  "$HOME/Library/Application Support/SMEDC/launcher/versions/0.5.1/node_modules/.bin/smedc-mcp-launcher" self-check
 ```
 
 ```powershell
 $env:SMEDC_BASE_URL = "https://api.smedatacenter.xyz"
-& "$env:LOCALAPPDATA\SMEDC\launcher\versions\0.5.0\node_modules\.bin\smedc-mcp-launcher.cmd" self-check
+& "$env:LOCALAPPDATA\SMEDC\launcher\versions\0.5.1\node_modules\.bin\smedc-mcp-launcher.cmd" self-check
 ```
 
 self-check 只返回安全的 machine-readable 字段，且 launcher 不会自更新。批准更新时使用新的精确版本

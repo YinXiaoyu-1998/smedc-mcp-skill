@@ -87,7 +87,7 @@ class SmedcSkillContractTests(unittest.TestCase):
     def test_current_smedc_contract_is_documented(self) -> None:
         expected_terms = [
             "smedc-mcp",
-            "smedc-mcp-launcher@0.5.0",
+            "smedc-mcp-launcher@0.5.1",
             "SMEDC_BASE_URL",
             "smedc",
             "smedc_login",
@@ -124,7 +124,8 @@ class SmedcSkillContractTests(unittest.TestCase):
                 self.assertIn("YinXiaoyu-1998/smedc-mcp-skill", content)
                 self.assertIn("~/.agents/skills/smedc-mcp", content)
                 self.assertIn("skills/smedc-mcp", content)
-                self.assertIn("smedc-mcp-launcher@0.5.0", content)
+                self.assertIn("smedc-mcp-launcher@0.5.1", content)
+                self.assertNotIn("smedc-mcp-launcher@0.5.0", content)
                 self.assertIn("SMEDC_BASE_URL=https://api.smedatacenter.xyz", content)
 
     def test_old_current_identities_are_absent_from_tracked_text_files(self) -> None:
