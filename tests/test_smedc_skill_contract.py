@@ -1,3 +1,4 @@
+import re
 import subprocess
 import unittest
 from pathlib import Path
@@ -9,6 +10,32 @@ SKILL_ROOT = ROOT / "skills" / "smedc-mcp"
 
 def read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
+
+
+def section(document: str, heading: str) -> str:
+    marker = f"## {heading}\n"
+    if marker not in document:
+        raise AssertionError(f"Missing active section: {heading}")
+    return document.split(marker, 1)[1].split("\n## ", 1)[0]
+
+
+def prose(content: str) -> str:
+    return " ".join(content.split())
+
+
+def launcher_versions(content: str) -> list[str]:
+    # Explicit install references only; bare minimum/history versions are not pins.
+    patterns = (
+        r"""smedc-mcp-launcher@([^\s`"']+)""",
+        r"""launcher[\\/]+versions[\\/]+([^\\/\s`"']+)""",
+        r'''"launcherVersion"\s*:\s*"([^"]+)"''',
+        r"this document pins launcher\s+(\S+?)(?=[.;]?(?:\s|$))",
+    )
+    return [
+        match.group(1)
+        for pattern in patterns
+        for match in re.finditer(pattern, content)
+    ]
 
 
 def old_identity_terms() -> list[str]:
@@ -87,7 +114,6 @@ class SmedcSkillContractTests(unittest.TestCase):
     def test_current_smedc_contract_is_documented(self) -> None:
         expected_terms = [
             "smedc-mcp",
-            "smedc-mcp-launcher@0.5.2",
             "SMEDC_BASE_URL",
             "smedc",
             "smedc_login",
@@ -107,50 +133,80 @@ class SmedcSkillContractTests(unittest.TestCase):
                 self.assertIn(term, self.current_text)
 
     def test_companions_require_explicit_authorization(self) -> None:
-        self.assertIn("## Optional Companion Skills", self.skill_text)
-        self.assertRegex(self.skill_text, r"explicitly authorizes its\s+installation")
-        self.assertIn("Never install it silently", self.skill_text)
-        self.assertIn("not required for ordinary SMEDC work", self.skill_text)
+        companions = prose(section(self.skill_text, "Optional Companion Skills"))
+        self.assertIn("explicitly authorizes its installation", companions)
+        self.assertIn("Never install it silently", companions)
+        self.assertIn("not required for ordinary SMEDC work", companions)
 
     def test_evidence_answers_surface_every_automatic_source_link(self) -> None:
-        self.assertIn("search_document_evidence` already returns `sources[]", self.skill_text)
-        self.assertIn("show every entry", self.skill_text)
-        self.assertIn("Do not call `get_source_document_download_url` again", self.skill_text)
-        self.assertIn("SOURCE_DOWNLOAD_URL_UNAVAILABLE", self.skill_text)
+        downloads = prose(section(self.skill_text, "Quarantine Certificates And Source Downloads"))
+        self.assertIn("search_document_evidence` already returns `sources[]", downloads)
+        self.assertIn("show every entry", downloads)
+        self.assertIn("Do not call `get_source_document_download_url` again", downloads)
+        self.assertIn("SOURCE_DOWNLOAD_URL_UNAVAILABLE", downloads)
+
+    def test_every_active_launcher_reference_uses_the_exact_pin(self) -> None:
+        active = {
+            "Skill approved package": self.skill_text.split("\n## ", 1)[0],
+            "Skill update pin": section(self.update_guide, "Continue Within The Requested Scope"),
+            "README release status": self.readme_text.split("\n## ", 1)[0],
+            "README.zh release status": self.readme_zh_text.split("\n## ", 1)[0],
+            "README install": section(self.readme_text, "Official Launcher"),
+            "README.zh install": section(self.readme_zh_text, "正式 Launcher"),
+        }
+        for heading in [
+            "Official Install Or Update",
+            "Device-Code Login Flow",
+            "Configure The Invoking Agent",
+            "Removal And Complete Uninstall",
+        ]:
+            active[heading] = section(self.skill_text, heading)
+        for label, content in active.items():
+            with self.subTest(section=label):
+                versions = launcher_versions(content)
+                self.assertTrue(versions, f"No launcher references in {label}")
+                self.assertEqual({"0.5.2"}, set(versions))
 
     def test_install_guidance_uses_current_repository_and_skill_name(self) -> None:
-        for content in [self.readme_text, self.readme_zh_text]:
-            with self.subTest(language=content.splitlines()[0]):
-                self.assertIn("YinXiaoyu-1998/smedc-mcp-skill", content)
-                self.assertIn("~/.agents/skills/smedc-mcp", content)
-                self.assertIn("skills/smedc-mcp", content)
-                self.assertIn("smedc-mcp-launcher@0.5.2", content)
-                self.assertNotIn("smedc-mcp-launcher@0.5.0", content)
-                self.assertIn("SMEDC_BASE_URL=https://api.smedatacenter.xyz", content)
+        for document, install_heading, update_heading, launcher_heading in [
+            (self.readme_text, "Install The Skill", "Update The Skill", "Official Launcher"),
+            (self.readme_zh_text, "安装 Skill", "更新 Skill 本体", "正式 Launcher"),
+        ]:
+            with self.subTest(language=install_heading):
+                install = section(document, install_heading)
+                self.assertIn("YinXiaoyu-1998/smedc-mcp-skill", section(document, update_heading))
+                self.assertIn("~/.agents/skills/smedc-mcp", install)
+                self.assertIn("skills/smedc-mcp", install)
+                self.assertIn(
+                    "SMEDC_BASE_URL=https://api.smedatacenter.xyz",
+                    section(document, launcher_heading),
+                )
 
     def test_linux_launcher_support_is_actionable_and_bounded(self) -> None:
         linux_launcher_directory = (
             "${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.5.2"
         )
 
-        self.assertIn("macOS, Windows, or Linux", self.skill_text)
-        self.assertIn(linux_launcher_directory, self.skill_text)
-        self.assertIn(linux_launcher_directory, self.readme_text)
-        self.assertIn(linux_launcher_directory, self.readme_zh_text)
-        self.assertIn("headless Linux", self.skill_text)
-        self.assertIn("openedBrowser: false", self.skill_text)
-        self.assertIn("memory only", self.skill_text)
-        self.assertIn("launcher or host restart", self.skill_text)
-        self.assertIn("openclaw mcp add smedc", self.skill_text)
-        self.assertIn("Linux", self.readme_text)
-        self.assertIn("无头 Linux", self.readme_zh_text)
+        install = prose(section(self.skill_text, "Official Install Or Update"))
+        device = prose(section(self.skill_text, "Device-Code Login Flow"))
+        self.assertIn("macOS, Windows, or Linux", install)
+        self.assertIn(linux_launcher_directory, install)
+        self.assertIn(linux_launcher_directory, section(self.readme_text, "Official Launcher"))
+        self.assertIn(linux_launcher_directory, section(self.readme_zh_text, "正式 Launcher"))
+        self.assertIn("headless Linux", device)
+        self.assertIn("openedBrowser: false", device)
+        self.assertIn("memory only", device)
+        self.assertIn("launcher or host restart", device)
+        self.assertIn("openclaw mcp add smedc", section(self.skill_text, "Configure The Invoking Agent"))
 
     def test_admin_only_upload_guidance_precedes_local_file_access(self) -> None:
+        upload = section(self.skill_text, "Admin-Only Uploads")
+        # Preserve exact canonical wire values; normalize ordinary prose below.
+        self.assertIn("`403 UPLOAD_ADMIN_REQUIRED`", upload)
+        self.assertIn("`File upload requires the admin role.`", upload)
+        self.assertIn("`retryable: false`", upload)
         for term in [
             "Only active accounts with role `admin` may upload",
-            "UPLOAD_ADMIN_REQUIRED",
-            "File upload requires the admin role.",
-            "`retryable: false`",
             "do not read or transform the local file",
             "Do not re-login or retry",
             "remain visible",
@@ -162,10 +218,9 @@ class SmedcSkillContractTests(unittest.TestCase):
             "delivery_ledger",
         ]:
             with self.subTest(term=term):
-                self.assertIn(term, self.skill_text)
-        self.assertNotRegex(self.skill_text, r"offer to upload it\s+first")
-        self.assertNotIn("0.5.1", self.current_text)
-        self.assertNotIn("smedc-mcp-launcher@latest", self.current_text)
+                self.assertIn(term, prose(upload))
+        questions = prose(section(self.skill_text, "SMEDC Data Questions"))
+        self.assertNotIn("offer to upload it first", questions)
 
     def test_old_current_identities_are_absent_from_tracked_text_files(self) -> None:
         matches: list[str] = []
