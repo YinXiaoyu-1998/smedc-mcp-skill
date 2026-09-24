@@ -16,8 +16,9 @@ Docker、worker、云资源或部署。
 仅启用的 `admin` 可上传证据文档、结构化数据（含进货台账 Delivery Ledger）和检疫证明。
 `employee` 无论 clearance 多高都不能上传，但仍可读取符合组织与密级授权的数据。上传工具保持
 可见并标为仅管理员可用；已知为 employee 时，agent 不得读取或转换本地文件。launcher 0.5.2
-在文件访问前预检查，本地拒绝不产生后端审计。后端独立强制 `403 UPLOAD_ADMIN_REQUIRED`、
-`File upload requires the admin role.`、`retryable: false`，并尽力记录 `file_upload.denied`。
+在文件访问前预检查，本地拒绝不产生后端审计。直接 HTTP 上传端点返回 HTTP `403`；
+MCP JSON-RPC 传输返回 HTTP `200`，工具结果包含 `isError: true`。两者均携带 `UPLOAD_ADMIN_REQUIRED`、
+`File upload requires the admin role.`、`retryable: false`；后端拒绝尽力记录 `file_upload.denied`。
 不要重登、重试或提高 clearance 来绕过拒绝。
 
 管理员可明确指定高于自身 clearance 的密级，但不会获得普通读取豁免。分片 create/parts/complete

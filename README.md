@@ -19,8 +19,10 @@ Only active admins can upload evidence, structured datasets (including Delivery 
 quarantine certificates. Employees at every clearance may read eligible data but cannot upload.
 Upload tools remain visible and admin-only; for a known employee role, the agent must not read or
 transform the local file. Launcher 0.5.2 preflights before file access; a local denial creates no
-backend audit. The backend independently enforces `403 UPLOAD_ADMIN_REQUIRED`, exact message
-`File upload requires the admin role.`, `retryable: false`, and best-effort `file_upload.denied`.
+backend audit. Direct HTTP upload endpoints return HTTP `403`; MCP JSON-RPC transport returns
+HTTP `200` with `isError: true` in the tool result. Both carry `UPLOAD_ADMIN_REQUIRED`, exact message
+`File upload requires the admin role.`, and `retryable: false`; backend denials best-effort record
+`file_upload.denied`.
 Do not re-login, retry, or increase clearance to recover from that denial.
 
 Admins may explicitly classify above their clearance without gaining ordinary read access.

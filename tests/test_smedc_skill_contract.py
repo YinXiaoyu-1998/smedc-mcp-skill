@@ -202,7 +202,7 @@ class SmedcSkillContractTests(unittest.TestCase):
     def test_admin_only_upload_guidance_precedes_local_file_access(self) -> None:
         upload = section(self.skill_text, "Admin-Only Uploads")
         # Preserve exact canonical wire values; normalize ordinary prose below.
-        self.assertIn("`403 UPLOAD_ADMIN_REQUIRED`", upload)
+        self.assertIn("`UPLOAD_ADMIN_REQUIRED`", upload)
         self.assertIn("`File upload requires the admin role.`", upload)
         self.assertIn("`retryable: false`", upload)
         for term in [
@@ -221,6 +221,27 @@ class SmedcSkillContractTests(unittest.TestCase):
                 self.assertIn(term, prose(upload))
         questions = prose(section(self.skill_text, "SMEDC Data Questions"))
         self.assertNotIn("offer to upload it first", questions)
+
+    def test_upload_denial_distinguishes_http_and_mcp_transport(self) -> None:
+        for document, heading in [
+            (self.skill_text, "Admin-Only Uploads"),
+            (self.readme_text, "Upload Permissions"),
+            (self.readme_zh_text, "上传权限"),
+        ]:
+            with self.subTest(section=heading):
+                active = prose(section(document, heading))
+                self.assertIn("HTTP `403`", active)
+                self.assertRegex(active, r"MCP JSON-RPC.{0,80}HTTP `200`")
+                for literal in [
+                    "`isError: true`",
+                    "`UPLOAD_ADMIN_REQUIRED`",
+                    "`File upload requires the admin role.`",
+                    "`retryable: false`",
+                ]:
+                    self.assertIn(literal, active)
+                self.assertNotRegex(
+                    active, r"HTTP/MCP[^.!。]*403|MCP\s+`403|MCP JSON-RPC[^.!。]*HTTP `403`"
+                )
 
     def test_old_current_identities_are_absent_from_tracked_text_files(self) -> None:
         matches: list[str] = []
