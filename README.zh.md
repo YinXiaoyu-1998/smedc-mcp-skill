@@ -7,9 +7,23 @@ Medium Enterprises Data Center 的缩写。它使用浏览器登录和正式服�
 本仓库只包含 skill 与 MCP 客户端连接说明；不操作 SMEDC 的 API、数据库、向量库、storage、
 Docker、worker、云资源或部署。
 
-> 在线服务状态：`smedc-mcp-launcher@0.5.1`、浏览器登录和公开 HTTPS MCP 边界是当前打包契约。
+> 在线服务状态：`smedc-mcp-launcher@0.5.2`、浏览器登录和公开 HTTPS MCP 边界是当前打包契约。
 > 员工仍需完成真实登录与后端授权。launcher 支持 macOS、Windows 和 Linux；无头 Linux
 > 使用同一 Device Authorization 流程，无安全存储时回退为仅内存会话。
+
+## 上传权限
+
+仅启用的 `admin` 可上传证据文档、结构化数据（含进货台账 Delivery Ledger）和检疫证明。
+`employee` 无论 clearance 多高都不能上传，但仍可读取符合组织与密级授权的数据。上传工具保持
+可见并标为仅管理员可用；已知为 employee 时，agent 不得读取或转换本地文件。launcher 0.5.2
+在文件访问前预检查，本地拒绝不产生后端审计。后端独立强制 `403 UPLOAD_ADMIN_REQUIRED`、
+`File upload requires the admin role.`、`retryable: false`，并尽力记录 `file_upload.denied`。
+不要重登、重试或提高 clearance 来绕过拒绝。
+
+管理员可明确指定高于自身 clearance 的密级，但不会获得普通读取豁免。分片 create/parts/complete
+要求管理员；owner abort 和既有状态、清单、读取规则保留。最低兼容版本仍为 0.5.0，批准安装的
+精确版本为 0.5.2；旧兼容 launcher 仍受后端授权保护。上传原始文件并报告服务校验错误，核心
+skill 不提供特定数据集的转换配方。
 
 ## 安装档位
 
@@ -80,39 +94,39 @@ Copy-Item -Recurse "skills\smedc-mcp" $SkillTarget
 
 ## 正式 Launcher
 
-唯一批准的 launcher 包是 `smedc-mcp-launcher@0.5.1`。禁止使用 npm `latest`、未固定版本或
+唯一批准的 launcher 包是 `smedc-mcp-launcher@0.5.2`。禁止使用 npm `latest`、未固定版本或
 launcher 自更新。
 
 先运行 `node --version` 和 `npm --version`。必须使用 Node.js 22 或更高版本并确保 npm 可用。经授权的
 员工自有 agent 用以下命令幂等安装或修复：
 
 ```sh
-npm install --prefix "<launcher-directory>" --save-exact smedc-mcp-launcher@0.5.1
+npm install --prefix "<launcher-directory>" --save-exact smedc-mcp-launcher@0.5.2
 ```
 
 使用批准的当前用户 launcher 目录：
 
 | 平台    | Launcher 目录                                                         |
 | ------- | --------------------------------------------------------------------- |
-| macOS   | `~/Library/Application Support/SMEDC/launcher/versions/0.5.1/`        |
-| Windows | `%LOCALAPPDATA%\\SMEDC\\launcher\\versions\\0.5.1\\`                  |
-| Linux   | `${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.5.1/` |
+| macOS   | `~/Library/Application Support/SMEDC/launcher/versions/0.5.2/`        |
+| Windows | `%LOCALAPPDATA%\\SMEDC\\launcher\\versions\\0.5.2\\`                  |
+| Linux   | `${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.5.2/` |
 
 agent 必须运行对应平台的精确自检，才能声明安装成功：
 
 ```sh
 SMEDC_BASE_URL=https://api.smedatacenter.xyz \
-  "$HOME/Library/Application Support/SMEDC/launcher/versions/0.5.1/node_modules/.bin/smedc-mcp-launcher" self-check
+  "$HOME/Library/Application Support/SMEDC/launcher/versions/0.5.2/node_modules/.bin/smedc-mcp-launcher" self-check
 ```
 
 ```powershell
 $env:SMEDC_BASE_URL = "https://api.smedatacenter.xyz"
-& "$env:LOCALAPPDATA\SMEDC\launcher\versions\0.5.1\node_modules\.bin\smedc-mcp-launcher.cmd" self-check
+& "$env:LOCALAPPDATA\SMEDC\launcher\versions\0.5.2\node_modules\.bin\smedc-mcp-launcher.cmd" self-check
 ```
 
 ```sh
 # Linux
-SMEDC_LAUNCHER_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.5.1"
+SMEDC_LAUNCHER_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.5.2"
 SMEDC_BASE_URL=https://api.smedatacenter.xyz \
   "$SMEDC_LAUNCHER_DIR/node_modules/.bin/smedc-mcp-launcher" self-check
 ```

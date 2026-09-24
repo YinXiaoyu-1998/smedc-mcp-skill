@@ -87,7 +87,7 @@ class SmedcSkillContractTests(unittest.TestCase):
     def test_current_smedc_contract_is_documented(self) -> None:
         expected_terms = [
             "smedc-mcp",
-            "smedc-mcp-launcher@0.5.1",
+            "smedc-mcp-launcher@0.5.2",
             "SMEDC_BASE_URL",
             "smedc",
             "smedc_login",
@@ -124,13 +124,13 @@ class SmedcSkillContractTests(unittest.TestCase):
                 self.assertIn("YinXiaoyu-1998/smedc-mcp-skill", content)
                 self.assertIn("~/.agents/skills/smedc-mcp", content)
                 self.assertIn("skills/smedc-mcp", content)
-                self.assertIn("smedc-mcp-launcher@0.5.1", content)
+                self.assertIn("smedc-mcp-launcher@0.5.2", content)
                 self.assertNotIn("smedc-mcp-launcher@0.5.0", content)
                 self.assertIn("SMEDC_BASE_URL=https://api.smedatacenter.xyz", content)
 
     def test_linux_launcher_support_is_actionable_and_bounded(self) -> None:
         linux_launcher_directory = (
-            "${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.5.1"
+            "${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.5.2"
         )
 
         self.assertIn("macOS, Windows, or Linux", self.skill_text)
@@ -144,6 +144,28 @@ class SmedcSkillContractTests(unittest.TestCase):
         self.assertIn("openclaw mcp add smedc", self.skill_text)
         self.assertIn("Linux", self.readme_text)
         self.assertIn("无头 Linux", self.readme_zh_text)
+
+    def test_admin_only_upload_guidance_precedes_local_file_access(self) -> None:
+        for term in [
+            "Only active accounts with role `admin` may upload",
+            "UPLOAD_ADMIN_REQUIRED",
+            "File upload requires the admin role.",
+            "`retryable: false`",
+            "do not read or transform the local file",
+            "Do not re-login or retry",
+            "remain visible",
+            "Do not dynamically hide or remove upload tools",
+            "Clearance is not upload permission",
+            "above their own clearance",
+            "creates no backend audit",
+            "file_upload.denied",
+            "delivery_ledger",
+        ]:
+            with self.subTest(term=term):
+                self.assertIn(term, self.skill_text)
+        self.assertNotRegex(self.skill_text, r"offer to upload it\s+first")
+        self.assertNotIn("0.5.1", self.current_text)
+        self.assertNotIn("smedc-mcp-launcher@latest", self.current_text)
 
     def test_old_current_identities_are_absent_from_tracked_text_files(self) -> None:
         matches: list[str] = []
