@@ -165,7 +165,7 @@ class SmedcSkillContractTests(unittest.TestCase):
             with self.subTest(section=label):
                 versions = launcher_versions(content)
                 self.assertTrue(versions, f"No launcher references in {label}")
-                self.assertEqual({"0.5.2"}, set(versions))
+                self.assertEqual({"0.6.0"}, set(versions))
 
     def test_install_guidance_uses_current_repository_and_skill_name(self) -> None:
         for document, install_heading, update_heading, launcher_heading in [
@@ -184,7 +184,7 @@ class SmedcSkillContractTests(unittest.TestCase):
 
     def test_linux_launcher_support_is_actionable_and_bounded(self) -> None:
         linux_launcher_directory = (
-            "${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.5.2"
+            "${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.6.0"
         )
 
         install = prose(section(self.skill_text, "Official Install Or Update"))
