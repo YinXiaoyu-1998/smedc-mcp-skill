@@ -15,9 +15,9 @@ API, database, vector store, storage, Docker, worker, cloud resources, or deploy
 
 ## Enterprise Onboarding And Account Permissions
 
-The planned primary entry is a fixed administrator permissions page plus admin login, with Chinese
+The primary entry after rollout is an enterprise-bound permissions page with shared browser sign-in, with Chinese
 by default and English switching. Developers share the verified URL with enterprise admins after
-rollout; the UI is design-only and not live yet. See [the entry workflow](skills/smedc-mcp/references/tenant-onboarding.md).
+rollout; the UI is implemented and locally verified in the service branch, but not deployed yet. See [the entry workflow](skills/smedc-mcp/references/tenant-onboarding.md).
 Existing enterprises reuse their rules for additional accounts. Until UI rollout, authorized
 management continues through current admin MCP tools; users never need to fill JSON. The bundled
 JSON template is an optional internal record, not a bulk import/export contract. Organization/account
