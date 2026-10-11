@@ -11,6 +11,12 @@ Docker、worker、云资源或部署。
 > 员工仍需完成真实登录与后端授权。launcher 支持 macOS、Windows 和 Linux；无头 Linux
 > 使用同一 Device Authorization 流程，无安全存储时回退为仅内存会话。
 
+## 企业入驻与新账号授权
+
+上线后的主要入口是企业专属固定权限设置页面＋共享网页登录状态，默认中文、支持 English。开发者在页面上线并验证后，把固定 URL 发给企业管理员；页面已在配套服务分支实现并完成本地验证，尚未部署上线。详见[入驻入口约定](skills/smedc-mcp/references/tenant-onboarding.md)。
+已有企业新增账号复用企业规则。UI 上线前仍可通过已授权的现有管理员 MCP 工具管理，用户不必填写 JSON；随 Skill 分发的 JSON 模板仅作可选内部记录，不是批量导入／导出合同。
+组织／账号创建与密码操作仍由运维负责，保存配置不等于激活新权限。
+
 ## 上传权限
 
 仅启用的 `admin` 可上传证据文档、结构化数据（含进货台账 Delivery Ledger）和检疫证明。
@@ -22,8 +28,7 @@ MCP JSON-RPC 传输返回 HTTP `200`，工具结果包含 `isError: true`。两�
 不要重登、重试或提高 clearance 来绕过拒绝。
 
 管理员可明确指定高于自身 clearance 的密级，但不会获得普通读取豁免。分片 create/parts/complete
-要求管理员；owner abort 和既有状态、清单、读取规则保留。最低兼容版本与批准安装版本均为
-0.6.0；更旧的 launcher 不受支持，并会收到 `LAUNCHER_UPGRADE_REQUIRED`。上传原始文件并报告服务校验错误，核心
+要求管理员；owner abort 和既有状态、清单、读取规则保留。最低兼容版本为 0.6.0，批准安装版本为 0.9.0；更旧的 launcher 不受支持，并会收到 `LAUNCHER_UPGRADE_REQUIRED`。上传原始文件并报告服务校验错误，核心
 skill 不提供特定数据集的转换配方。
 
 ## 台账 PDF 能力与服务端切换
