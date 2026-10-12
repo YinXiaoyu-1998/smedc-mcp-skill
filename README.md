@@ -45,8 +45,11 @@ service validation errors; this core skill provides no dataset-specific transfor
 
 The [four archive tool contracts](skills/smedc-mcp/references/ledger-pdf-tools.md) require launcher
 0.9.0, which is published and independently verified, plus service archive delivery enabled.
-The approved installation pin is 0.9.0; archive delivery remains gated by service rollout. At cutover, ledger detail and original CSV/XLSX signing
-close; supported store/date aggregates and other datasets remain available. Workflow coordination
+The approved installation pin is 0.9.0; archive delivery remains gated by service rollout.
+Raw ledger detail, aggregates, source coverage and original CSV/XLSX signing are disabled for all roles.
+The readable dataset catalog omits `delivery_ledger`, while the admin upload tool still supports
+original receipts. Validate upload support against that tool's input contract, then confirm
+application with `get_import_status`; use PDF coverage for archive readiness. Other datasets remain available. Workflow coordination
 belongs to the independently installed delivery-ledger companion; the core Skill never generates
 local ledgers.
 
