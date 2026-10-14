@@ -95,6 +95,10 @@ class SmedcSkillContractTests(unittest.TestCase):
         self.assertIn("old successful idempotency key does not restore", guide)
         self.assertIn("group-level", guide)
         self.assertIn("no default grants", guide)
+        self.assertIn("safe asynchronous", guide)
+        self.assertIn("Only an `applied` batch", guide)
+        self.assertIn("importBatch.publicationSummary", guide)
+        self.assertIn("readable `sourceSheetSummary` remains an array", guide)
 
     def test_every_active_launcher_reference_uses_the_exact_pin(self) -> None:
         active = {
