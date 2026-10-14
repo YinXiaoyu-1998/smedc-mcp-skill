@@ -99,6 +99,9 @@ class SmedcSkillContractTests(unittest.TestCase):
         self.assertIn("Only an `applied` batch", guide)
         self.assertIn("importBatch.publicationSummary", guide)
         self.assertIn("readable `sourceSheetSummary` remains an array", guide)
+        for invariant in ["metadataPolicy: \"none\"", "selection is flat", "retryable 409",
+                          "value.createdCount", "saving or resolving unsaved drafts"]:
+            self.assertIn(invariant, guide)
 
     def test_every_active_launcher_reference_uses_the_exact_pin(self) -> None:
         active = {
