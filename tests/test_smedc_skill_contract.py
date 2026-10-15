@@ -72,6 +72,39 @@ class SmedcSkillContractTests(unittest.TestCase):
             with self.subTest(term=term):
                 self.assertIn(term, self.current_text)
 
+    def test_cost_card_candidate_is_directory_and_local_csv_only(self) -> None:
+        self.assertIn("references/cost-cards.md", self.skill_text)
+        guide = read(SKILL_ROOT / "references" / "cost-cards.md")
+        for contract in ["candidate `0.10.0`", "not published", "35", "38",
+                         "query_structured_dataset", "download_cost_cards", "costCardIds",
+                         "sourceDocumentId", "importBatchId", "revision", "finally",
+                         "matched_product_name", "24 hours", "100", "32 KiB"]:
+            with self.subTest(contract=contract):
+                self.assertIn(contract, guide)
+        self.assertIn("server-side detail filtering or aggregation", guide)
+        self.assertIn("not an upload template", guide)
+        self.assertIn("entire batch", guide)
+        self.assertIn("Explicit IDs", guide)
+        self.assertIn("same name", guide)
+        for field in ["cost_card_id", "enterprise_name", "source_namespace", "spu_id", "sku_id",
+                      "dish_name", "specification_name", "base_category_name", "sale_price",
+                      "has_cost_card", "source_dish_deleted", "revision", "source_document_id",
+                      "import_batch_id", "item_row_count", "recipe_count", "byte_size", "csv_schema_version"]:
+            self.assertIn(f"`{field}`", guide)
+        self.assertIn("archiving an original leaves active card", guide)
+        self.assertIn("old successful idempotency key does not restore", guide)
+        self.assertIn("group-level", guide)
+        self.assertIn("no default grants", guide)
+        self.assertIn("safe asynchronous", guide)
+        self.assertIn("Only an `applied` batch", guide)
+        self.assertIn("importBatch.publicationSummary", guide)
+        self.assertIn("readable `sourceSheetSummary` remains an array", guide)
+        for invariant in ["metadataPolicy: \"none\"", "selection is flat", "retryable 409",
+                          "value.createdCount", "saving or resolving unsaved drafts",
+                          "get_import_status({importBatchId})", "cost_card_<costCardId>.csv",
+                          "archive_cost_card({costCardId})", "plus `fileName`", "Revoked access returns 404"]:
+            self.assertIn(invariant, guide)
+
     def test_every_active_launcher_reference_uses_the_exact_pin(self) -> None:
         active = {
             "Skill approved package": self.skill_text.split("\n## ", 1)[0],

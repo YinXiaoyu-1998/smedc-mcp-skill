@@ -37,14 +37,21 @@ tenant activation; package installation alone does not activate a live tenant. F
 those tools are available. Permission checks always happen on the service; cached identity is
 not a permission card and does not authorize content.
 
+## Cost Cards (Candidate, Release Gated)
+
+For cost-card original uploads, directory lookup, same-name disambiguation, local CSV
+analysis, archive/restore and cleanup, read [cost cards](references/cost-cards.md).
+The cost-card contract targets candidate `0.10.0`, not a published or approved install.
+Keep the verified installation pin above; tool discovery alone does not establish readiness.
+
 ## Enterprise Onboarding And New Account Permissions
 
 For enterprise onboarding or account permissions, follow
 [the administrator UI entry workflow](references/tenant-onboarding.md). The enterprise-bound UI reuses a valid browser sign-in from official device login;
-it checks current tenant membership and admin role on every page/API, defaults to Chinese and supports English; it is implemented in the companion service branch but not deployed yet.
-After verified rollout, developers share this entry with enterprise admins. Users configure through
+it checks current tenant membership and admin role on every page/API, defaults to Chinese and supports English. The UI is implemented in the current service; verify the target enterprise entry before handoff.
+Developers share the verified entry with enterprise admins. Users configure through
 the UI rather than filling JSON. Existing enterprises reuse their rules for new accounts. JSON is
-an optional internal record only. Until rollout, authorized management uses the current MCP tools;
+an optional internal record only. Explicitly requested MCP management uses the current controlled tools;
 account creation stays with the operator, and saving configuration does not activate a tenant.
 
 ## Update This Skill
