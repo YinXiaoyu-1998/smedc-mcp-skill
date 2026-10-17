@@ -799,6 +799,19 @@ commands, treat it as Other Agents below: inspect its supported local stdio mech
 host-integration blocker only if that mechanism is absent or unclear. Do not report Linux or the
 SMEDC launcher itself as unsupported merely because that product's configuration interface differs.
 
+### DeepSeek Harness (dsh)
+
+dsh composes plugins from a cordis profile instead of a client JSON file. Add one
+`@deepseek-ai/dsh-mcp-client` insert entry to `~/.dsh/profiles/<profile>/cordis.patch.yml`,
+pointing `command` at the absolute launcher path in the versioned directory above, with
+`args: ["serve"]` and the sole `SMEDC_BASE_URL` value. dsh exposes the tools as
+`mcp__smedc__<tool>`; the launcher still receives the bare name.
+
+See [dsh-compat.md](references/dsh-compat.md) for the copy-paste entry, the name mapping, and
+launcher process hygiene. Never remove or kill launcher processes or configuration entries that
+belong to another host, even when they appear idle or unused. This subsection covers the current
+dsh release only; other hosts do not need that file.
+
 ### Other Agents
 
 Use guarded adaptive discovery. Inspect the installed client's help, current configuration, and
