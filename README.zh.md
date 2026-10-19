@@ -34,7 +34,7 @@ MCP JSON-RPC 传输返回 HTTP `200`，工具结果包含 `isError: true`。两�
 不要重登、重试或提高 clearance 来绕过拒绝。
 
 管理员可明确指定高于自身 clearance 的密级，但不会获得普通读取豁免。分片 create/parts/complete
-要求管理员；owner abort 和既有状态、清单、读取规则保留。最低兼容版本为 0.6.0，批准安装版本为 0.12.0；低于最低兼容版本的 launcher 不受支持，并会收到 `LAUNCHER_UPGRADE_REQUIRED`。上传原始文件并报告服务校验错误，核心
+要求管理员；owner abort 和既有状态、清单、读取规则保留。源码最低兼容及批准安装版本均为 0.12.0；更旧的 launcher 在 OAuth 签发及刷新时会收到 `LAUNCHER_UPGRADE_REQUIRED`。已核实线上推荐 0.12.0、最低 0.6.0；源码最低版本变更待合并与部署。上传原始文件并报告服务校验错误，核心
 skill 不提供特定数据集的转换配方。
 
 ## 台账 PDF 能力与服务端切换
