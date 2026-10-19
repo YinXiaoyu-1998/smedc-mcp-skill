@@ -1,4 +1,5 @@
 import re
+import json
 import unittest
 from pathlib import Path
 
@@ -186,6 +187,23 @@ class SmedcSkillContractTests(unittest.TestCase):
         self.assertIn("including admins", reference)
         self.assertIn("not PDF completion", self.skill_text)
         self.assertIn("cannot trigger generation through MCP or HTTP", self.skill_text)
+
+    def test_store_review_examples_cover_platform_facts_and_omit_unread_text(self) -> None:
+        guide = read(SKILL_ROOT / "references" / "store-reviews.md")
+        examples = [(name, json.loads(payload)) for name, payload in re.findall(
+            r"`(upsert_store_reviews|query_store_reviews)` —[^\n]*\n\n```json\n([\s\S]*?)\n```", guide)]
+        self.assertEqual(9, len(examples))
+        rows = [row for name, payload in examples if name == "upsert_store_reviews" for row in payload["reviews"]]
+        self.assertEqual({"replied", "unreplied_no_content", "unreplied_with_content", "needs_verification"}, {row["replyStatus"] for row in rows if "replyStatus" in row})
+        unknown = [row for row in rows if row.get("replyStatus") == "needs_verification"]
+        self.assertTrue(unknown)
+        self.assertNotIn("content", unknown[0])
+        self.assertNotIn("merchantReply", unknown[0])
+        self.assertEqual(["unreplied_no_content", "unreplied_with_content"], examples[-1][1]["replyStatuses"])
+        self.assertFalse(examples[-1][1]["hasReply"])
+        for row in rows:
+            self.assertNotIn("draftReply", row)
+            self.assertNotIn("aiSource", row)
 
     def test_distributed_skill_has_no_retired_product_or_tenant_names(self) -> None:
         retired = re.compile(
