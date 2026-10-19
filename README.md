@@ -45,8 +45,9 @@ Do not re-login, retry, or increase clearance to recover from that denial.
 
 Admins may explicitly classify above their clearance without gaining ordinary read access.
 Partition create/parts/complete require admin; owner abort and existing status/manifest/read rules
-remain available. Minimum compatible launcher is 0.6.0; the approved install pin is 0.12.0.
-Older launchers are unsupported and receive `LAUNCHER_UPGRADE_REQUIRED`. Upload original files and report
+remain available. The service source minimum and approved install pin are 0.12.0.
+Older launchers receive `LAUNCHER_UPGRADE_REQUIRED` during OAuth issuance and refresh. The verified
+live service recommends 0.12.0 with minimum 0.6.0; the source minimum increase awaits merge and deployment. Upload original files and report
 service validation errors; this core skill provides no dataset-specific transformations.
 
 ## Ledger PDF Capability And Service Rollout
