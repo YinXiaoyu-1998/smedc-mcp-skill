@@ -192,7 +192,7 @@ class SmedcSkillContractTests(unittest.TestCase):
         guide = read(SKILL_ROOT / "references" / "store-reviews.md")
         examples = [(name, json.loads(payload)) for name, payload in re.findall(
             r"`(upsert_store_reviews|query_store_reviews)` —[^\n]*\n\n```json\n([\s\S]*?)\n```", guide)]
-        self.assertEqual(9, len(examples))
+        self.assertEqual(11, len(examples))
         rows = [row for name, payload in examples if name == "upsert_store_reviews" for row in payload["reviews"]]
         self.assertEqual({"replied", "unreplied_no_content", "unreplied_with_content", "needs_verification"}, {row["replyStatus"] for row in rows if "replyStatus" in row})
         unknown = [row for row in rows if row.get("replyStatus") == "needs_verification"]
@@ -204,6 +204,17 @@ class SmedcSkillContractTests(unittest.TestCase):
         for row in rows:
             self.assertNotIn("draftReply", row)
             self.assertNotIn("aiSource", row)
+
+    def test_candidate_feedback_examples_keep_same_minute_records_distinct(self) -> None:
+        guide = read(SKILL_ROOT / "references" / "store-reviews.md")
+        examples = [(name, json.loads(payload)) for name, payload in re.findall(
+            r"`(upsert_store_reviews|query_store_reviews)` —[^\n]*\n\n```json\n([\s\S]*?)\n```", guide)]
+        rows = [row for name, payload in examples if name == "upsert_store_reviews" for row in payload["reviews"] if "feedbackId" in row]
+        self.assertEqual(["feedback-test-a", "feedback-test-b"], [row["feedbackId"] for row in rows])
+        self.assertEqual(rows[0]["reviewerName"], rows[1]["reviewerName"])
+        self.assertEqual(rows[0]["reviewedAt"], rows[1]["reviewedAt"])
+        queries = [payload for name, payload in examples if name == "query_store_reviews" and "feedbackId" in payload]
+        self.assertEqual("feedback-test-a", queries[0]["feedbackId"])
 
     def test_distributed_skill_has_no_retired_product_or_tenant_names(self) -> None:
         retired = re.compile(
