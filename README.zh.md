@@ -7,7 +7,7 @@ Medium Enterprises Data Center 的缩写。它使用浏览器登录和正式服�
 本仓库只包含 skill 与 MCP 客户端连接说明；不操作 SMEDC 的 API、数据库、向量库、storage、
 Docker、worker、云资源或部署。
 
-> launcher 发布状态：`smedc-mcp-launcher@0.12.0`、浏览器登录和公开 HTTPS MCP 边界是当前打包契约。
+> launcher 发布状态：`smedc-mcp-launcher@0.13.0`、浏览器登录和公开 HTTPS MCP 边界是当前打包契约。
 > 目标服务上线另行核对；员工仍需完成真实登录与后端授权。launcher 支持 macOS、Windows 和 Linux；无头 Linux
 > 使用同一 Device Authorization 流程，无安全存储时回退为仅内存会话。
 
@@ -19,7 +19,7 @@ Docker、worker、云资源或部署。
 
 ## 店铺评价
 
-已发布并独立验证的 launcher `0.12.0` 包含原子评价写入、授权查询、按操作区分的企业候选及平台回复状态字段（`replyStatus` / `replyStatuses`）。
+已发布并独立验证的 launcher `0.13.0` 包含原子评价写入、授权查询、按操作区分的企业候选、平台回复状态字段（`replyStatus` / `replyStatuses`）及可选平台身份（`feedbackId`）。
 详见[评价规则](skills/smedc-mcp/references/store-reviews.md)，仍须核对匹配服务部署、类别与 grant；
 只保存平台已发布并核验的回复。安装包不等于激活企业。
 
@@ -27,20 +27,20 @@ Docker、worker、云资源或部署。
 
 仅启用的 `admin` 可上传证据文档、结构化数据（含进货台账 Delivery Ledger）和检疫证明。
 `employee` 无论 clearance 多高都不能上传，但仍可读取符合组织与密级授权的数据。上传工具保持
-可见并标为仅管理员可用；已知为 employee 时，agent 不得读取或转换本地文件。launcher 0.12.0
+可见并标为仅管理员可用；已知为 employee 时，agent 不得读取或转换本地文件。launcher 0.13.0
 在文件访问前预检查，本地拒绝不产生后端审计。直接 HTTP 上传端点返回 HTTP `403`；
 MCP JSON-RPC 传输返回 HTTP `200`，工具结果包含 `isError: true`。两者均携带 `UPLOAD_ADMIN_REQUIRED`、
 `File upload requires the admin role.`、`retryable: false`；后端拒绝尽力记录 `file_upload.denied`。
 不要重登、重试或提高 clearance 来绕过拒绝。
 
 管理员可明确指定高于自身 clearance 的密级，但不会获得普通读取豁免。分片 create/parts/complete
-要求管理员；owner abort 和既有状态、清单、读取规则保留。源码最低兼容及批准安装版本均为 0.12.0；更旧的 launcher 在 OAuth 签发及刷新时会收到 `LAUNCHER_UPGRADE_REQUIRED`。已核实线上推荐 0.12.0、最低 0.6.0；源码最低版本变更待合并与部署。上传原始文件并报告服务校验错误，核心
+要求管理员；owner abort 和既有状态、清单、读取规则保留。源码最低兼容为 0.12.0，推荐及批准安装版本为 0.13.0；更旧的 launcher 在 OAuth 签发及刷新时会收到 `LAUNCHER_UPGRADE_REQUIRED`。已核实线上推荐 0.12.0、最低 0.12.0，匹配服务及 feedbackId 迁移已另行核实；源码推荐版本变更待合并与部署。上传原始文件并报告服务校验错误，核心
 skill 不提供特定数据集的转换配方。
 
 ## 台账 PDF 能力与服务端切换
 
 [四个归档工具契约](skills/smedc-mcp/references/ledger-pdf-tools.md) 需要正式发布后的 launcher
-0.12.0 和已启用归档交付的服务端。0.12.0 已公开发布并独立验证，当前安装 pin 为 0.12.0；
+0.13.0 和已启用归档交付的服务端。0.13.0 已公开发布并独立验证，当前安装 pin 为 0.13.0；
 归档交付仍等待服务端切换。
 切换后，台账明细与原始 CSV/XLSX 签名关闭；门店/日期聚合和其他数据集继续可用。
 上传、照片、PDF 就绪检查和下载协调由独立安装的 delivery-ledger companion 负责；核心 Skill 不在本地生成台账。
@@ -94,39 +94,39 @@ commit、实际加载路径和清理结果；仍需重载或存在旧副本时�
 
 ## 正式 Launcher
 
-唯一批准的 launcher 包是 `smedc-mcp-launcher@0.12.0`。禁止使用 npm `latest`、未固定版本或
+唯一批准的 launcher 包是 `smedc-mcp-launcher@0.13.0`。禁止使用 npm `latest`、未固定版本或
 launcher 自更新。
 
 先运行 `node --version` 和 `npm --version`。必须使用 Node.js 22 或更高版本并确保 npm 可用。经授权的
 员工自有 agent 用以下命令幂等安装或修复：
 
 ```sh
-npm install --prefix "<launcher-directory>" --save-exact smedc-mcp-launcher@0.12.0
+npm install --prefix "<launcher-directory>" --save-exact smedc-mcp-launcher@0.13.0
 ```
 
 使用批准的当前用户 launcher 目录：
 
 | 平台    | Launcher 目录                                                          |
 | ------- | ---------------------------------------------------------------------- |
-| macOS   | `~/Library/Application Support/SMEDC/launcher/versions/0.12.0/`        |
-| Windows | `%LOCALAPPDATA%\\SMEDC\\launcher\\versions\\0.12.0\\`                  |
-| Linux   | `${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.12.0/` |
+| macOS   | `~/Library/Application Support/SMEDC/launcher/versions/0.13.0/`        |
+| Windows | `%LOCALAPPDATA%\\SMEDC\\launcher\\versions\\0.13.0\\`                  |
+| Linux   | `${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.13.0/` |
 
 agent 必须运行对应平台的精确自检，才能声明安装成功：
 
 ```sh
 SMEDC_BASE_URL=https://api.smedatacenter.xyz \
-  "$HOME/Library/Application Support/SMEDC/launcher/versions/0.12.0/node_modules/.bin/smedc-mcp-launcher" self-check
+  "$HOME/Library/Application Support/SMEDC/launcher/versions/0.13.0/node_modules/.bin/smedc-mcp-launcher" self-check
 ```
 
 ```powershell
 $env:SMEDC_BASE_URL = "https://api.smedatacenter.xyz"
-& "$env:LOCALAPPDATA\SMEDC\launcher\versions\0.12.0\node_modules\.bin\smedc-mcp-launcher.cmd" self-check
+& "$env:LOCALAPPDATA\SMEDC\launcher\versions\0.13.0\node_modules\.bin\smedc-mcp-launcher.cmd" self-check
 ```
 
 ```sh
 # Linux
-SMEDC_LAUNCHER_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.12.0"
+SMEDC_LAUNCHER_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.13.0"
 SMEDC_BASE_URL=https://api.smedatacenter.xyz \
   "$SMEDC_LAUNCHER_DIR/node_modules/.bin/smedc-mcp-launcher" self-check
 ```
