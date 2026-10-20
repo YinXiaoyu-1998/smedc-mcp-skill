@@ -1,194 +1,81 @@
 # SMEDC MCP Skill
 
-The official runbook for employee-owned agents to install and use the SMEDC remote MCP
-launcher. SMEDC stands for Small and Medium Enterprises Data Center. It uses browser login and
-the official service origin `https://api.smedatacenter.xyz`; employees never give passwords,
-tokens, or authorization codes to an agent.
+Official installation and MCP usage guidance for employee-owned agents accessing SMEDC
+(Small and Medium Enterprises Data Center). The approved package is
+`smedc-mcp-launcher@0.13.0`, published and independently verified. Current installation authority
+is [SKILL.md](skills/smedc-mcp/SKILL.md). [中文说明](README.zh.md).
 
-This repository contains only skill and client-connection guidance. It never operates the SMEDC
-API, database, vector store, storage, Docker, worker, cloud resources, or deployment.
+## Scope And Documentation
 
-> Published launcher: `smedc-mcp-launcher@0.13.0`, browser login, and the public HTTPS MCP
-> boundary are the packaging contract. Verify matching service rollout separately. Real employee login and backend authorization are
-> still required. The launcher supports macOS, Windows, and Linux; headless Linux uses the same
-> Device Authorization flow and falls back to a memory-only session when no secure store exists.
+The Skill covers official launcher installation, browser login, authorization-safe uploads/queries
+and typed recovery. Employees enter passwords only in the official browser page; agents never
+handle passwords, tokens or authorization codes. This repository does not operate service
+infrastructure or execute business reports.
 
-## Enterprise Onboarding And Account Permissions
+| Topic | Maintained entrypoint |
+| --- | --- |
+| Installation, client configuration, login and MCP tools | [Core Skill](skills/smedc-mcp/SKILL.md) |
+| Skill replacement | [Update procedure](skills/smedc-mcp/references/update-skill.md) |
+| Launcher upgrade and cleanup | [Upgrade procedure](skills/smedc-mcp/references/upgrade-cleanup.md) |
+| Enterprise onboarding | [Admin UI entry](skills/smedc-mcp/references/tenant-onboarding.md) |
+| Permissions and controlled management | [Business authorization](skills/smedc-mcp/references/business-authorization.md) |
+| Cost-card directory and local CSV analysis | [Cost cards](skills/smedc-mcp/references/cost-cards.md) |
+| Platform review facts and identity | [Store reviews](skills/smedc-mcp/references/store-reviews.md) |
+| Service-generated daily PDF archives | [Ledger tools](skills/smedc-mcp/references/ledger-pdf-tools.md) |
+| DeepSeek Harness client configuration | [dsh wiring](skills/smedc-mcp/references/dsh-compat.md) |
 
-The primary entry is an enterprise-bound permissions page with shared browser sign-in, with Chinese
-by default and English switching. The current service implements the UI; developers verify the
-target enterprise entry and service rollout before sharing its URL with enterprise admins. See [the entry workflow](skills/smedc-mcp/references/tenant-onboarding.md).
-Existing enterprises reuse their rules for additional accounts. Users may also explicitly choose
-authorized current admin MCP tools; they never need to fill JSON. The bundled
-JSON template is an optional internal record, not a bulk import/export contract. Organization/account
-creation and passwords stay with the operator; saving configuration does not activate a tenant.
-
-## Store Reviews
-
-Published, independently verified launcher `0.13.0` includes atomic review upserts, authorized
-queries, operation-specific enterprise candidates, platform reply-status fields (`replyStatus` /
-`replyStatuses`) and optional platform identity (`feedbackId`). Follow [store reviews](skills/smedc-mcp/references/store-reviews.md),
-confirm matching service rollout and explicit category/grant configuration, and store only verified
-published platform replies. Package installation does not activate a tenant.
-
-## Upload Permissions
-
-Only active admins can upload evidence, structured datasets (including Delivery Ledger), and
-quarantine certificates. Employees at every clearance may read eligible data but cannot upload.
-Upload tools remain visible and admin-only; for a known employee role, the agent must not read or
-transform the local file. Launcher 0.13.0 preflights before file access; a local denial creates no
-backend audit. Direct HTTP upload endpoints return HTTP `403`; MCP JSON-RPC transport returns
-HTTP `200` with `isError: true` in the tool result. Both carry `UPLOAD_ADMIN_REQUIRED`, exact message
-`File upload requires the admin role.`, and `retryable: false`; backend denials best-effort record
-`file_upload.denied`.
-Do not re-login, retry, or increase clearance to recover from that denial.
-
-Admins may explicitly classify above their clearance without gaining ordinary read access.
-Partition create/parts/complete require admin; owner abort and existing status/manifest/read rules
-remain available. The service source minimum is 0.12.0; the recommendation and approved install pin are 0.13.0.
-Older launchers receive `LAUNCHER_UPGRADE_REQUIRED` during OAuth issuance and refresh. The verified
-live service recommends 0.12.0 with minimum 0.12.0; matching service deployment and the
-feedbackId migration are verified separately from this recommendation change.
-The source recommendation change awaits merge and deployment. Upload original files and report
-service validation errors; this core skill provides no dataset-specific transformations.
-
-## Ledger PDF Capability And Service Rollout
-
-The [four archive tool contracts](skills/smedc-mcp/references/ledger-pdf-tools.md) require launcher
-0.13.0, which is published and independently verified, plus service archive delivery enabled.
-The approved installation pin is 0.13.0; archive delivery remains gated by service rollout.
-Raw ledger detail, aggregates, source coverage and original CSV/XLSX signing are disabled for all roles.
-The readable dataset catalog omits `delivery_ledger`, while the admin upload tool still supports
-original receipts. Validate upload support against that tool's input contract, then confirm
-application with `get_import_status`; use PDF coverage for archive readiness. Other datasets remain available. Workflow coordination
-belongs to the independently installed delivery-ledger companion; the core Skill never generates
-local ledgers.
-
-## Installation Profiles
-
-### Core-only install
-
-This is the default profile. Install only `smedc-mcp` for launcher setup, browser login, uploads,
-and authorization-safe SMEDC queries. Optional companion skills are not required for ordinary SMEDC
-work and are never installed silently by a core install or update.
-
-### Optional companions
-
-Both companions live in
-[`YinXiaoyu-1998/smedc-companion-skills`](https://github.com/YinXiaoyu-1998/smedc-companion-skills)
-and remain independently installed skills:
-
-- `smedc-business-analysis` generates organization-backed operating diagnoses, weekly reports, and
-  monthly reports.
-- `smedc-delivery-ledger` coordinates scheduled server daily PDFs, ZIP preparation, and receipt-linked
-  quarantine-certificate photo operations when the archive capability is released and enabled.
-
-If a companion is absent, an agent may identify the official source and offer to install it, but the
-employee must explicitly authorize that installation or request the named companion or all
-recommended companions. Installing or updating either repository does not update the other.
+Package publication, service deployment, tenant activation and client acceptance are separate.
+Current service evidence belongs to the [service repository's readiness record](https://github.com/YinXiaoyu-1998/SME_DATA_CENTER/blob/main/docs/implementation/staging-readiness.md).
+Do not maintain another live-version snapshot here or infer business access from package installation.
 
 ## Install The Skill
 
-Clone or download this repository, then install the skill to the canonical current-user skill
-directory. Do not default to `~/.codex/skills`.
+Retrieve [this repository](https://github.com/YinXiaoyu-1998/smedc-mcp-skill) and install only
+`skills/smedc-mcp/`, using the [complete-directory replacement procedure](skills/smedc-mcp/references/update-skill.md).
 
-| Platform         | Canonical target                         |
-| ---------------- | ---------------------------------------- |
-| macOS/Linux-like | `~/.agents/skills/smedc-mcp`             |
-| Windows          | `%USERPROFILE%\.agents\skills\smedc-mcp` |
+| Platform | Canonical target |
+| --- | --- |
+| macOS/Linux | `~/.agents/skills/smedc-mcp` |
+| Windows | `%USERPROFILE%\.agents\skills\smedc-mcp` |
 
-Ask the agent to follow the [skill replacement procedure](skills/smedc-mcp/references/update-skill.md):
-stage the complete directory, keep temporary recovery copies outside all skill discovery roots,
-verify file contents and the host's loaded copy, then remove obsolete duplicates and temporary
-backups. Do not overlay an existing directory or create `.bak` copies inside a skill root.
-If the host needs a reload/restart, complete that step before claiming the installed skill is active.
+Preserve local customizations and unrelated Skills. Keep recovery copies outside discovery roots;
+do not overlay directories or leave `.bak` Skills there. Verify contents and the host's loaded copy;
+a pending reload means activation is incomplete.
 
 ## Update The Skill
 
-Ask your agent: "Update the smedc-mcp-skill skill." The installed skill recognizes both `smedc-mcp`
-and `smedc-mcp-skill`, retrieves the latest default-branch revision from
-[`YinXiaoyu-1998/smedc-mcp-skill`](https://github.com/YinXiaoyu-1998/smedc-mcp-skill), and backs up,
-replaces, and verifies its complete skill directory. A marketplace listing is not required. The
-agent reports the source commit, loaded installation path, and cleanup result; pending host
-reloads or obsolete copies are reported as incomplete.
-
-Updating the skill alone preserves the launcher and login session. A launcher upgrade requires a
-launcher or general SMEDC update request and uses the exact pin in the refreshed official skill. Network/write access and
-the host's supported installation mechanism are still required. See the
-[update procedure](skills/smedc-mcp/references/update-skill.md).
+Ask the agent: “Update the smedc-mcp-skill skill.” Both `smedc-mcp` and `smedc-mcp-skill`
+resolve to the latest default-branch `skills/smedc-mcp/` revision from
+[YinXiaoyu-1998/smedc-mcp-skill](https://github.com/YinXiaoyu-1998/smedc-mcp-skill).
+The [update procedure](skills/smedc-mcp/references/update-skill.md) owns retrieval, backup,
+replacement, verification and cleanup. Report source commit, installation path and reload status.
+A Skill-only update preserves the launcher and login session; a launcher upgrade needs its own
+or a general SMEDC update request.
 
 ## Official Launcher
 
-The only approved launcher package is `smedc-mcp-launcher@0.13.0`. Never use npm `latest`, an
-unpinned version, or launcher self-update.
+Use only `smedc-mcp-launcher@0.13.0`, with Node.js 22+ and npm. Never install npm `latest` or
+use launcher self-update. The MCP entry is `smedc`, configured as local stdio with one `serve`
+argument and `SMEDC_BASE_URL=https://api.smedatacenter.xyz`. Platform paths, exact commands,
+self-check and host setup live in [Official Install Or Update](skills/smedc-mcp/SKILL.md#official-install-or-update).
+macOS, Windows and Linux are supported; hosts without a secure store use memory-only sessions.
+An upgrade follows the [complete upgrade procedure](skills/smedc-mcp/references/upgrade-cleanup.md);
+self-check alone does not prove the host has reconnected to the new launcher.
 
-Run `node --version` and `npm --version` first. Node.js 22 or newer and a working npm are required.
-An authorized employee-owned agent installs or repairs it idempotently:
+## Optional Companions
 
-```sh
-npm install --prefix "<launcher-directory>" --save-exact smedc-mcp-launcher@0.13.0
+[smedc-companion-skills](https://github.com/YinXiaoyu-1998/smedc-companion-skills) maintains
+`smedc-business-analysis`, `smedc-delivery-ledger` and independent Meituan workflows. Install only
+requested companions; a core install/update does not implicitly install or update them. Companions
+use this core Skill's approved launcher pin while owning their business workflows.
+
+## Maintenance
+
+The complete `skills/smedc-mcp/` tree must match
+[the service repository's copy](https://github.com/YinXiaoyu-1998/SME_DATA_CENTER/tree/main/skills/smedc-mcp)
+byte-for-byte, including host-specific references. Change both in coordinated PRs. A Skill revision
+is its Git commit, not a new launcher release. Documentation-only changes do not bump the launcher.
+
+```bash
+python3 -m unittest discover -s tests -v
 ```
-
-Use the approved current-user launcher directory:
-
-| Platform | Launcher directory                                                     |
-| -------- | ---------------------------------------------------------------------- |
-| macOS    | `~/Library/Application Support/SMEDC/launcher/versions/0.13.0/`        |
-| Windows  | `%LOCALAPPDATA%\\SMEDC\\launcher\\versions\\0.13.0\\`                  |
-| Linux    | `${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.13.0/` |
-
-The agent must run the exact platform self-check before claiming success:
-
-```sh
-SMEDC_BASE_URL=https://api.smedatacenter.xyz \
-  "$HOME/Library/Application Support/SMEDC/launcher/versions/0.13.0/node_modules/.bin/smedc-mcp-launcher" self-check
-```
-
-```powershell
-$env:SMEDC_BASE_URL = "https://api.smedatacenter.xyz"
-& "$env:LOCALAPPDATA\SMEDC\launcher\versions\0.13.0\node_modules\.bin\smedc-mcp-launcher.cmd" self-check
-```
-
-```sh
-# Linux
-SMEDC_LAUNCHER_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.13.0"
-SMEDC_BASE_URL=https://api.smedatacenter.xyz \
-  "$SMEDC_LAUNCHER_DIR/node_modules/.bin/smedc-mcp-launcher" self-check
-```
-
-Self-check returns only safe machine-readable fields and never self-updates. A general SMEDC
-update refreshes the skill and follows the required
-[upgrade and cleanup procedure](skills/smedc-mcp/references/upgrade-cleanup.md): prepare the
-approved launcher, switch MCP entries, reconnect and verify the running version, stop old
-processes, then remove superseded installations and temporary backups. Requests to remove all
-old versions also migrate safely discoverable current-user SMEDC integrations. Preserve valid
-operating-system secure sessions. A standalone self-check is not proof of the host connection.
-On Linux, `secureStore.available:false` is supported:
-the launcher returns the first-party login link instead of opening a local browser when headless,
-keeps the resulting session in memory only, and requires login again after launcher or host restart.
-
-## Configuration And Login
-
-Configure SMEDC as a local stdio launcher named `smedc`, not as a direct remote HTTP/OAuth server.
-The complete launch tuple has one `serve` argument and one non-secret environment value:
-`SMEDC_BASE_URL=https://api.smedatacenter.xyz`.
-
-Before changing an MCP client, inspect its configuration and make a timestamped backup. Add or
-replace its `smedc` stdio entry and remove verified duplicate SMEDC entries within the requested
-scope; preserve every unrelated server and setting.
-
-Use `smedc_auth_status` when authentication state is unknown. On `authentication_required`, invoke
-`smedc_login` and ask the employee only to complete the browser page. After success, retry the
-original business operation once. Use `smedc_logout` only on an employee's request.
-
-When an employee asks which account is active, use the zero-input `smedc_get_current_user` tool. It
-returns the authenticated employee's `displayName`, `email`, `role`, `clearance`, and
-`organizationName`. The skill directory tool is `smedc_list_skills`.
-
-## Contents
-
-- `skills/smedc-mcp/SKILL.md`
-- `skills/smedc-mcp/agents/openai.yaml`
-- `skills/smedc-mcp/references/update-skill.md`
-- `skills/smedc-mcp/references/upgrade-cleanup.md`
-- `skills/smedc-mcp/references/ledger-pdf-tools.md`

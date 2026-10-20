@@ -1,163 +1,74 @@
 # SMEDC MCP Skill
 
-这是员工自有 agent 安装和使用 SMEDC 远程 MCP launcher 的正式运行手册。SMEDC 是 Small and
-Medium Enterprises Data Center 的缩写。它使用浏览器登录和正式服务地址
-`https://api.smedatacenter.xyz`；员工绝不通过 agent 提供密码、token 或授权码。
+面向员工自有智能体的企业资料中枢（Small and Medium Enterprises Data Center）安装与 MCP 使用指导。
+已批准的包为 `smedc-mcp-launcher@0.13.0`，已公开发布并独立验证。
+当前安装权威入口为 [SKILL.md](skills/smedc-mcp/SKILL.md)。[English](README.md)。
 
-本仓库只包含 skill 与 MCP 客户端连接说明；不操作 SMEDC 的 API、数据库、向量库、storage、
-Docker、worker、云资源或部署。
+## 范围与文档
 
-> launcher 发布状态：`smedc-mcp-launcher@0.13.0`、浏览器登录和公开 HTTPS MCP 边界是当前打包契约。
-> 目标服务上线另行核对；员工仍需完成真实登录与后端授权。launcher 支持 macOS、Windows 和 Linux；无头 Linux
-> 使用同一 Device Authorization 流程，无安全存储时回退为仅内存会话。
+核心 Skill 负责官方 launcher 安装、浏览器登录、受权上传／查询和错误恢复。
+员工只在官方浏览器页面输入密码，智能体不处理密码、token 或授权码。
+本仓库不操作服务基础设施，也不执行业务报表。
 
-## 企业入驻与新账号授权
+| 主题 | 唯一维护入口 |
+| --- | --- |
+| 安装、客户端配置、登录与 MCP 工具 | [核心 Skill](skills/smedc-mcp/SKILL.md) |
+| Skill 完整替换 | [更新流程](skills/smedc-mcp/references/update-skill.md) |
+| Launcher 升级与清理 | [升级流程](skills/smedc-mcp/references/upgrade-cleanup.md) |
+| 企业入驻 | [管理员 UI 入口](skills/smedc-mcp/references/tenant-onboarding.md) |
+| 业务权限与受控管理 | [业务授权](skills/smedc-mcp/references/business-authorization.md) |
+| 成本卡目录与本地 CSV 分析 | [成本卡](skills/smedc-mcp/references/cost-cards.md) |
+| 平台评价事实与身份 | [门店评价](skills/smedc-mcp/references/store-reviews.md) |
+| 服务端每日 PDF 台账 | [台账工具](skills/smedc-mcp/references/ledger-pdf-tools.md) |
+| DeepSeek Harness 配置 | [dsh 接入](skills/smedc-mcp/references/dsh-compat.md) |
 
-主要入口是企业专属固定权限设置页面＋共享网页登录状态，默认中文、支持 English。当前服务已实现页面；开发者核对目标服务上线与企业专属入口后，向管理员交付固定 URL。详见[入驻入口约定](skills/smedc-mcp/references/tenant-onboarding.md)。
-已有企业新增账号复用企业规则。用户也可明确选择已授权的现有管理员 MCP 工具管理，用户不必填写 JSON；随 Skill 分发的 JSON 模板仅作可选内部记录，不是批量导入／导出合同。
-组织／账号创建与密码操作仍由运维负责，保存配置不等于激活新权限。
-
-## 店铺评价
-
-已发布并独立验证的 launcher `0.13.0` 包含原子评价写入、授权查询、按操作区分的企业候选、平台回复状态字段（`replyStatus` / `replyStatuses`）及可选平台身份（`feedbackId`）。
-详见[评价规则](skills/smedc-mcp/references/store-reviews.md)，仍须核对匹配服务部署、类别与 grant；
-只保存平台已发布并核验的回复。安装包不等于激活企业。
-
-## 上传权限
-
-仅启用的 `admin` 可上传证据文档、结构化数据（含进货台账 Delivery Ledger）和检疫证明。
-`employee` 无论 clearance 多高都不能上传，但仍可读取符合组织与密级授权的数据。上传工具保持
-可见并标为仅管理员可用；已知为 employee 时，agent 不得读取或转换本地文件。launcher 0.13.0
-在文件访问前预检查，本地拒绝不产生后端审计。直接 HTTP 上传端点返回 HTTP `403`；
-MCP JSON-RPC 传输返回 HTTP `200`，工具结果包含 `isError: true`。两者均携带 `UPLOAD_ADMIN_REQUIRED`、
-`File upload requires the admin role.`、`retryable: false`；后端拒绝尽力记录 `file_upload.denied`。
-不要重登、重试或提高 clearance 来绕过拒绝。
-
-管理员可明确指定高于自身 clearance 的密级，但不会获得普通读取豁免。分片 create/parts/complete
-要求管理员；owner abort 和既有状态、清单、读取规则保留。源码最低兼容为 0.12.0，推荐及批准安装版本为 0.13.0；更旧的 launcher 在 OAuth 签发及刷新时会收到 `LAUNCHER_UPGRADE_REQUIRED`。已核实线上推荐 0.12.0、最低 0.12.0，匹配服务及 feedbackId 迁移已另行核实；源码推荐版本变更待合并与部署。上传原始文件并报告服务校验错误，核心
-skill 不提供特定数据集的转换配方。
-
-## 台账 PDF 能力与服务端切换
-
-[四个归档工具契约](skills/smedc-mcp/references/ledger-pdf-tools.md) 需要正式发布后的 launcher
-0.13.0 和已启用归档交付的服务端。0.13.0 已公开发布并独立验证，当前安装 pin 为 0.13.0；
-归档交付仍等待服务端切换。
-切换后，台账明细与原始 CSV/XLSX 签名关闭；门店/日期聚合和其他数据集继续可用。
-上传、照片、PDF 就绪检查和下载协调由独立安装的 delivery-ledger companion 负责；核心 Skill 不在本地生成台账。
-
-## 安装档位
-
-### 仅安装核心
-
-这是默认档位。只安装 `smedc-mcp`，用于 launcher 配置、浏览器登录、文件上传和遵守授权边界的
-SMEDC 查询。普通 SMEDC 工作不需要安装任何可选配套 skill，安装或更新核心 skill 时也绝不静默安装
-这些配套能力。
-
-### 可选配套
-
-两个配套 skill 都在
-[`YinXiaoyu-1998/smedc-companion-skills`](https://github.com/YinXiaoyu-1998/smedc-companion-skills)
-中，并保持为独立安装的 skill：
-
-- `smedc-business-analysis` 生成基于组织名称的经营诊断、周报和月报。
-- `smedc-delivery-ledger` 在归档能力发布并启用后，协调服务端定时生成的每日 PDF、ZIP 准备和收货单关联检疫照片操作。
-
-如果尚未安装，agent 可以说明其官方来源并提出安装，但员工必须明确同意安装，或已经明确要求安装这个
-具名配套 skill / 全部推荐配套 skill。安装或更新任意一边都不会自动更新另一边。
+包发布、服务部署、租户激活和客户端验收分别取证。
+服务状态统一见[服务仓库的核验记录](https://github.com/YinXiaoyu-1998/SME_DATA_CENTER/blob/main/docs/implementation/staging-readiness.md)，
+这里不复制另一份线上版本快照，也不以安装成功推断业务授权。
 
 ## 安装 Skill
 
-clone 或下载本仓库后，把 skill 安装到当前用户的 canonical skill 目录。不要默认安装到
-`~/.codex/skills`。
+获取[本仓库](https://github.com/YinXiaoyu-1998/smedc-mcp-skill)，仅安装 `skills/smedc-mcp/`，
+遵循[完整目录替换流程](skills/smedc-mcp/references/update-skill.md)。
 
-| 平台             | Canonical target                         |
-| ---------------- | ---------------------------------------- |
-| macOS/Linux-like | `~/.agents/skills/smedc-mcp`             |
-| Windows          | `%USERPROFILE%\.agents\skills\smedc-mcp` |
+| 平台 | Canonical 目录 |
+| --- | --- |
+| macOS/Linux | `~/.agents/skills/smedc-mcp` |
+| Windows | `%USERPROFILE%\.agents\skills\smedc-mcp` |
 
-让 agent 遵循 [Skill 替换流程](skills/smedc-mcp/references/update-skill.md)：暂存完整目录，
-把临时恢复备份放在所有 Skill 发现目录之外，校验文件并确认宿主实际加载的新副本，再删除旧副本和临时备份。
-不要覆盖复制已有目录，也不要在 Skill 目录内创建 `.bak` 副本。
-需要刷新或重启宿主时，完成该步骤后才能声明新 Skill 已生效。
+保留本地定制和无关 Skills；恢复副本放在发现目录之外，不覆盖合并，也不在发现目录留下 `.bak`。
+确认文件及宿主实际加载的新副本，需要重载时不得宣称已生效。
 
 ## 更新 Skill 本体
 
-直接对 agent 说：“帮我更新 smedc-mcp-skill 这个 skill。”新版 skill 同时识别 `smedc-mcp` 和
-`smedc-mcp-skill`，会从
-[`YinXiaoyu-1998/smedc-mcp-skill`](https://github.com/YinXiaoyu-1998/smedc-mcp-skill)
-的默认分支获取最新内容，备份、替换并校验完整 skill 目录，不依赖推荐市场。完成后会报告来源
-commit、实际加载路径和清理结果；仍需重载或存在旧副本时，必须报告尚未完成。
-
-只更新 skill 会保留 launcher 和登录会话。升级 launcher 需要用户提出该请求，并使用更新后的官方 skill
-所批准的精确版本。agent 仍需具备网络访问、目录写入权限及宿主支持的安装方式。详见
-[skill 更新流程](skills/smedc-mcp/references/update-skill.md)。
+对 agent 说：“帮我更新 smedc-mcp-skill 这个 skill。”两个名称 `smedc-mcp` 和 `smedc-mcp-skill`
+均指向 [YinXiaoyu-1998/smedc-mcp-skill](https://github.com/YinXiaoyu-1998/smedc-mcp-skill)
+默认分支的最新 `skills/smedc-mcp/`。获取、备份、替换、验证和清理遵循[更新流程](skills/smedc-mcp/references/update-skill.md)。
+完成后报告来源 commit、安装路径和重载状态。只更新 Skill 保留 launcher 与登录会话；
+升级 launcher 需要单独的升级请求或一般 SMEDC 更新请求。
 
 ## 正式 Launcher
 
-唯一批准的 launcher 包是 `smedc-mcp-launcher@0.13.0`。禁止使用 npm `latest`、未固定版本或
-launcher 自更新。
+只使用 `smedc-mcp-launcher@0.13.0`，要求 Node.js 22+ 和 npm。
+禁止安装 npm `latest` 或由 launcher 自更新。MCP entry 为 `smedc`，使用本地 stdio、
+一个 `serve` 参数和 `SMEDC_BASE_URL=https://api.smedatacenter.xyz`。
+平台路径、精确命令、自检和宿主配置统一见[安装流程](skills/smedc-mcp/SKILL.md#official-install-or-update)。
+支持 macOS、Windows、Linux；没有安全存储时使用内存会话。
+升级须完成[完整升级流程](skills/smedc-mcp/references/upgrade-cleanup.md)，单独自检不证明宿主已重连新版。
 
-先运行 `node --version` 和 `npm --version`。必须使用 Node.js 22 或更高版本并确保 npm 可用。经授权的
-员工自有 agent 用以下命令幂等安装或修复：
+## 可选配套技能
 
-```sh
-npm install --prefix "<launcher-directory>" --save-exact smedc-mcp-launcher@0.13.0
+[smedc-companion-skills](https://github.com/YinXiaoyu-1998/smedc-companion-skills)
+维护 `smedc-business-analysis`、`smedc-delivery-ledger` 和独立美团工作流。
+仅安装用户请求的 companion；核心安装／更新不隐含安装或更新配套技能。
+Companion 使用核心 Skill 批准的 launcher pin，并各自维护业务流程。
+
+## 维护
+
+完整 `skills/smedc-mcp/` 必须与[服务仓库副本](https://github.com/YinXiaoyu-1998/SME_DATA_CENTER/tree/main/skills/smedc-mcp)
+逐字节一致，包括宿主专用 reference；通过配套 PR 同步。Skill 修订以 Git commit 标识，
+不等于 launcher 发布；纯文档修改不增加 launcher 版本。
+
+```bash
+python3 -m unittest discover -s tests -v
 ```
-
-使用批准的当前用户 launcher 目录：
-
-| 平台    | Launcher 目录                                                          |
-| ------- | ---------------------------------------------------------------------- |
-| macOS   | `~/Library/Application Support/SMEDC/launcher/versions/0.13.0/`        |
-| Windows | `%LOCALAPPDATA%\\SMEDC\\launcher\\versions\\0.13.0\\`                  |
-| Linux   | `${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.13.0/` |
-
-agent 必须运行对应平台的精确自检，才能声明安装成功：
-
-```sh
-SMEDC_BASE_URL=https://api.smedatacenter.xyz \
-  "$HOME/Library/Application Support/SMEDC/launcher/versions/0.13.0/node_modules/.bin/smedc-mcp-launcher" self-check
-```
-
-```powershell
-$env:SMEDC_BASE_URL = "https://api.smedatacenter.xyz"
-& "$env:LOCALAPPDATA\SMEDC\launcher\versions\0.13.0\node_modules\.bin\smedc-mcp-launcher.cmd" self-check
-```
-
-```sh
-# Linux
-SMEDC_LAUNCHER_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/SMEDC/launcher/versions/0.13.0"
-SMEDC_BASE_URL=https://api.smedatacenter.xyz \
-  "$SMEDC_LAUNCHER_DIR/node_modules/.bin/smedc-mcp-launcher" self-check
-```
-
-self-check 只返回安全的 machine-readable 字段，且 launcher 不会自更新。一般的 SMEDC 更新请求会先
-刷新 Skill，再执行完整的[升级清理流程](skills/smedc-mcp/references/upgrade-cleanup.md)：安装并检查批准
-版本、切换 MCP 配置、重连并确认实际运行版本、停止旧进程，最后删除旧安装和临时备份。要求清除所有旧版本
-时，也要迁移当前用户下可安全发现的其他 SMEDC 接入。保留有效的操作系统安全会话。单独自检成功不能证明
-宿主已连接新版。Linux 上
-`secureStore.available:false` 是受支持的结果：无头环境不打开本地浏览器，而是返回第一方
-登录链接；完成后会话只保存在内存中，launcher 或主机重启后需重新登录。
-
-## 配置与登录
-
-把 SMEDC 配置成本地 stdio launcher，名称为 `smedc`，不要配置成直连远程 HTTP/OAuth 服务。完整 launch
-tuple 只有一个 `serve` 参数和一个非秘密环境变量：`SMEDC_BASE_URL=https://api.smedatacenter.xyz`。
-
-修改 MCP 客户端前，先检查现有配置并创建带时间戳的备份。添加或替换它的 `smedc` stdio entry，并删除
-授权范围内已核实的重复 SMEDC entry，保留所有无关 server 与设置。
-
-认证状态未知时调用 `smedc_auth_status`。若返回 `authentication_required`，调用 `smedc_login`，只请员工
-在浏览器页面完成登录。成功后只重试原业务操作一次。仅在员工要求退出时调用 `smedc_logout`。
-
-员工询问当前登录的是哪个账号时，调用零参数 `smedc_get_current_user`。它返回当前已认证员工的
-`displayName`、`email`、`role`、`clearance` 和 `organizationName`。skill 目录工具是
-`smedc_list_skills`。
-
-## 内容
-
-- `skills/smedc-mcp/SKILL.md`
-- `skills/smedc-mcp/agents/openai.yaml`
-- `skills/smedc-mcp/references/update-skill.md`
-- `skills/smedc-mcp/references/upgrade-cleanup.md`
-- `skills/smedc-mcp/references/ledger-pdf-tools.md`

@@ -200,10 +200,10 @@ denial creates no backend audit; a backend denial best-effort records `file_uplo
 Clearance is not upload permission. Employees at clearance 3 still cannot upload. Admins may
 upload evidence with an explicit level 0–3, category and complete scopes, including above their own clearance. Fixed-category uploads use the current category level after activation; an old upload level cannot change it. This does not grant ordinary read access. Status, manifest, search, query, and download use current server business authorization; uploader progress is separate from content access. Partition create/parts/complete require
 admin; owner abort remains allowed. The service source requires launcher 0.12.0 or newer for OAuth issuance and refresh;
-older launchers receive `LAUNCHER_UPGRADE_REQUIRED`. The source recommendation is 0.13.0; that recommendation awaits merge and deployment.
-The verified live service recommends 0.12.0 with minimum 0.12.0; the matching feedbackId service
-and migration are verified separately from this pending recommendation change. The backend remains
-authoritative for every accepted request.
+older launchers receive `LAUNCHER_UPGRADE_REQUIRED`. Use the approved installation pin above.
+Current public policy and deployment evidence are maintained in the
+[service readiness record](https://github.com/YinXiaoyu-1998/SME_DATA_CENTER/blob/main/docs/implementation/staging-readiness.md).
+The backend remains authoritative for every accepted request.
 
 Upload original files and report service validation errors. This skill does not provide
 dataset-specific transformations. Future service identities require a separate design; they must
