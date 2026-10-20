@@ -50,14 +50,14 @@ environment value is `SMEDC_BASE_URL`.
 dsh registers every MCP tool under a server-qualified name, so the tools in this skill appear as
 `mcp__smedc__<tool>`. Nothing is renamed on the wire; the launcher still receives the bare name.
 
-| This skill says | dsh exposes |
-| --- | --- |
-| `smedc_auth_status` | `mcp__smedc__smedc_auth_status` |
-| `smedc_login` / `smedc_logout` | `mcp__smedc__smedc_login` / `mcp__smedc__smedc_logout` |
-| `get_my_permissions` | `mcp__smedc__get_my_permissions` |
+| This skill says                                | dsh exposes                                                            |
+| ---------------------------------------------- | ---------------------------------------------------------------------- |
+| `smedc_auth_status`                            | `mcp__smedc__smedc_auth_status`                                        |
+| `smedc_login` / `smedc_logout`                 | `mcp__smedc__smedc_login` / `mcp__smedc__smedc_logout`                 |
+| `get_my_permissions`                           | `mcp__smedc__get_my_permissions`                                       |
 | `query_store_reviews` / `upsert_store_reviews` | `mcp__smedc__query_store_reviews` / `mcp__smedc__upsert_store_reviews` |
-| `query_structured_dataset` | `mcp__smedc__query_structured_dataset` |
-| `upload_structured_dataset` | `mcp__smedc__upload_structured_dataset` |
+| `query_structured_dataset`                     | `mcp__smedc__query_structured_dataset`                                 |
+| `upload_structured_dataset`                    | `mcp__smedc__upload_structured_dataset`                                |
 
 Map names one-to-one; a tool that does not appear in the session's tool list is not connected,
 not renamed differently.
