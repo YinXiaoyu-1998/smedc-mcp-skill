@@ -2,7 +2,7 @@
 
 Official installation and MCP usage guidance for employee-owned agents accessing SMEDC
 (Small and Medium Enterprises Data Center). The approved package is
-`smedc-mcp-launcher@0.13.0`, published and independently verified. Current installation authority
+`smedc-mcp-launcher@0.13.1`, published and independently verified. Current installation authority
 is [SKILL.md](skills/smedc-mcp/SKILL.md). [中文说明](README.zh.md).
 
 ## Scope And Documentation
@@ -54,7 +54,7 @@ or a general SMEDC update request.
 
 ## Official Launcher
 
-Use only `smedc-mcp-launcher@0.13.0`, with Node.js 22+ and npm. Never install npm `latest` or
+Use only `smedc-mcp-launcher@0.13.1`, with Node.js 22+ and npm. Never install npm `latest` or
 use launcher self-update. The MCP entry is `smedc`, configured as local stdio with one `serve`
 argument and `SMEDC_BASE_URL=https://api.smedatacenter.xyz`. Platform paths, exact commands,
 self-check and host setup live in [Official Install Or Update](skills/smedc-mcp/SKILL.md#official-install-or-update).
