@@ -20,6 +20,7 @@ infrastructure or execute business reports.
 | Enterprise onboarding | [Admin UI entry](skills/smedc-mcp/references/tenant-onboarding.md) |
 | Permissions and controlled management | [Business authorization](skills/smedc-mcp/references/business-authorization.md) |
 | Cost-card directory and local CSV analysis | [Cost cards](skills/smedc-mcp/references/cost-cards.md) |
+| Complete settled-order snapshots (future release gated) | [Settled orders](skills/smedc-mcp/references/settled-orders.md) |
 | Platform review facts and identity | [Store reviews](skills/smedc-mcp/references/store-reviews.md) |
 | Service-generated daily PDF archives | [Ledger tools](skills/smedc-mcp/references/ledger-pdf-tools.md) |
 | DeepSeek Harness client configuration | [dsh wiring](skills/smedc-mcp/references/dsh-compat.md) |

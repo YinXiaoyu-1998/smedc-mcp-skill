@@ -106,6 +106,23 @@ class SmedcSkillContractTests(unittest.TestCase):
                           "archive_cost_card({costCardId})", "plus `fileName`", "Revoked access returns 404"]:
             self.assertIn(invariant, guide)
 
+    def test_settled_orders_remain_release_gated_with_parameter_safe_examples(self) -> None:
+        self.assertIn("references/settled-orders.md", self.skill_text)
+        guide = read(SKILL_ROOT / "references" / "settled-orders.md")
+        for contract in ["future published, independently verified launcher `0.14.0`", "approved installation pin remains",
+                         "`0.13.1`", "matching", "no grants", "finally", "31 columns", "结账方式JSON"]:
+            with self.subTest(contract=contract):
+                self.assertIn(contract, guide)
+        examples = [(name, json.loads(payload)) for name, payload in re.findall(
+            r"`([a-z_]+)` —[^\n]*\n\n```json\n([\s\S]*?)\n```", guide)]
+        self.assertEqual(7, len(examples))
+        upload = examples[0][1]
+        self.assertEqual("settled_orders", upload["dataset"])
+        self.assertEqual("path", upload["file"]["encoding"])
+        self.assertNotIn("snapshotDate", upload)
+        self.assertEqual({"requestId": "pd_synthetic_example"}, examples[-1][1])
+        self.assertEqual("download_structured_partitions", examples[-1][0])
+
     def test_every_active_launcher_reference_uses_the_exact_pin(self) -> None:
         active = {
             "Skill approved package": self.skill_text.split("\n## ", 1)[0],

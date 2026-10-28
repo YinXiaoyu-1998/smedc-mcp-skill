@@ -18,6 +18,7 @@
 | 企业入驻 | [管理员 UI 入口](skills/smedc-mcp/references/tenant-onboarding.md) |
 | 业务权限与受控管理 | [业务授权](skills/smedc-mcp/references/business-authorization.md) |
 | 成本卡目录与本地 CSV 分析 | [成本卡](skills/smedc-mcp/references/cost-cards.md) |
+| 店内已结账订单完整快照（未来发行门禁） | [订单指导](skills/smedc-mcp/references/settled-orders.md) |
 | 平台评价事实与身份 | [门店评价](skills/smedc-mcp/references/store-reviews.md) |
 | 服务端每日 PDF 台账 | [台账工具](skills/smedc-mcp/references/ledger-pdf-tools.md) |
 | DeepSeek Harness 配置 | [dsh 接入](skills/smedc-mcp/references/dsh-compat.md) |
