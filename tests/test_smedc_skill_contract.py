@@ -76,7 +76,7 @@ class SmedcSkillContractTests(unittest.TestCase):
     def test_published_cost_card_workflow_is_directory_and_local_csv_only(self) -> None:
         self.assertIn("references/cost-cards.md", self.skill_text)
         guide = read(SKILL_ROOT / "references" / "cost-cards.md")
-        for contract in ["Launcher `0.14.0` is published and independently verified", "matching service rollout", "35", "38",
+        for contract in ["Launcher `0.15.0` is published and independently verified", "matching service rollout", "35", "38",
                          "query_structured_dataset", "download_cost_cards", "costCardIds",
                          "sourceDocumentId", "importBatchId", "revision", "finally",
                          "matched_product_name", "24 hours", "100", "32 KiB"]:
@@ -109,8 +109,8 @@ class SmedcSkillContractTests(unittest.TestCase):
     def test_in_store_orders_require_release_and_current_authorization_with_parameter_safe_examples(self) -> None:
         self.assertIn("references/in-store-orders.md", self.skill_text)
         guide = read(SKILL_ROOT / "references" / "in-store-orders.md")
-        for contract in ["source candidate `0.15.0`", "not yet published", "approved installation pin",
-                         "`0.14.0`", "matching", "no grants", "finally", "31 columns", "结账方式JSON"]:
+        for contract in ["published, independently verified launcher `0.15.0`", "approved installation pin",
+                         "`0.15.0`", "matching", "no grants", "finally", "31 columns", "结账方式JSON"]:
             with self.subTest(contract=contract):
                 self.assertIn(contract, guide)
         examples = [(name, json.loads(payload)) for name, payload in re.findall(
@@ -149,7 +149,7 @@ class SmedcSkillContractTests(unittest.TestCase):
             with self.subTest(section=label):
                 versions = launcher_versions(content)
                 self.assertTrue(versions, f"No launcher references in {label}")
-                self.assertEqual({"0.14.0"}, set(versions))
+                self.assertEqual({"0.15.0"}, set(versions))
 
     def test_install_guidance_uses_current_repository_and_skill_name(self) -> None:
         for document, install_heading, update_heading, launcher_heading in [
@@ -170,9 +170,9 @@ class SmedcSkillContractTests(unittest.TestCase):
         for path in sorted(SKILL_ROOT.rglob("*")):
             if path.suffix in {".md", ".yaml"}:
                 with self.subTest(path=path.relative_to(SKILL_ROOT)):
-                    self.assertTrue(set(launcher_versions(read(path))) <= {"0.14.0", "..."})
+                    self.assertTrue(set(launcher_versions(read(path))) <= {"0.15.0", "..."})
         reference = read(SKILL_ROOT / "references" / "ledger-pdf-tools.md")
-        self.assertIn("0.14.0 is published and independently verified", reference)
+        self.assertIn("0.15.0 is published and independently verified", reference)
         self.assertNotIn("once published", reference)
         self.assertIn("service archive delivery", reference)
         self.assertIn("references/ledger-pdf-tools.md", self.skill_text)
@@ -184,7 +184,7 @@ class SmedcSkillContractTests(unittest.TestCase):
         self.assertNotIn("prepare_structured_partition_download", range_guide)
         self.assertNotIn("get_structured_partition_download_status", range_guide)
         guide = section(self.skill_text, "Optional Partition Bundle Downloads (Release Gated)")
-        for text in ["approved exact pin", "Launcher `0.14.0`", "published and independently verified",
+        for text in ["approved exact pin", "Launcher `0.15.0`", "published and independently verified",
                      "server endpoints to be deployed", "prepare_structured_partition_download",
                      "get_structured_partition_download_status", "retryAfterSeconds", "isError",
                      "with only `requestId`", "does not wait for packaging", "1–128", "1–2000",
