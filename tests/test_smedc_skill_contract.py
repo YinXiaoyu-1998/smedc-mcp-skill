@@ -106,10 +106,10 @@ class SmedcSkillContractTests(unittest.TestCase):
                           "archive_cost_card({costCardId})", "plus `fileName`", "Revoked access returns 404"]:
             self.assertIn(invariant, guide)
 
-    def test_settled_orders_require_current_authorization_with_parameter_safe_examples(self) -> None:
-        self.assertIn("references/settled-orders.md", self.skill_text)
-        guide = read(SKILL_ROOT / "references" / "settled-orders.md")
-        for contract in ["published, independently verified launcher `0.14.0`", "approved exact installation pin",
+    def test_in_store_orders_require_release_and_current_authorization_with_parameter_safe_examples(self) -> None:
+        self.assertIn("references/in-store-orders.md", self.skill_text)
+        guide = read(SKILL_ROOT / "references" / "in-store-orders.md")
+        for contract in ["source candidate `0.15.0`", "not yet published", "approved installation pin",
                          "`0.14.0`", "matching", "no grants", "finally", "31 columns", "结账方式JSON"]:
             with self.subTest(contract=contract):
                 self.assertIn(contract, guide)
@@ -117,11 +117,17 @@ class SmedcSkillContractTests(unittest.TestCase):
             r"`([a-z_]+)` —[^\n]*\n\n```json\n([\s\S]*?)\n```", guide)]
         self.assertEqual(7, len(examples))
         upload = examples[0][1]
-        self.assertEqual("settled_orders", upload["dataset"])
+        self.assertEqual("in_store_orders", upload["dataset"])
         self.assertEqual("path", upload["file"]["encoding"])
         self.assertNotIn("snapshotDate", upload)
         self.assertEqual({"requestId": "pd_synthetic_example"}, examples[-1][1])
         self.assertEqual("download_structured_partitions", examples[-1][0])
+        for state in ["待制作", "未结账", "已结账", "已撤单", "已退单"]:
+            self.assertIn(state, guide)
+        self.assertIn("Unknown source states and empty states", guide)
+        self.assertIn("Request fingerprints are preserved", guide)
+        self.assertIn("ZIP requests for the old name expire", guide)
+        self.assertFalse((SKILL_ROOT / "references" / "settled-orders.md").exists())
 
     def test_every_active_launcher_reference_uses_the_exact_pin(self) -> None:
         active = {
