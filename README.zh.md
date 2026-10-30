@@ -18,10 +18,15 @@
 | 企业入驻 | [管理员 UI 入口](skills/smedc-mcp/references/tenant-onboarding.md) |
 | 业务权限与受控管理 | [业务授权](skills/smedc-mcp/references/business-authorization.md) |
 | 成本卡目录与本地 CSV 分析 | [成本卡](skills/smedc-mcp/references/cost-cards.md) |
-| 店内已结账订单完整快照 | [订单指导](skills/smedc-mcp/references/settled-orders.md) |
+| 店内订单全部状态的完整快照 | [店内订单指导](skills/smedc-mcp/references/in-store-orders.md) |
+| 平台外卖全部平台的完整快照 | [外卖订单指导](skills/smedc-mcp/references/takeaway-orders.md) |
 | 平台评价事实与身份 | [门店评价](skills/smedc-mcp/references/store-reviews.md) |
 | 服务端每日 PDF 台账 | [台账工具](skills/smedc-mcp/references/ledger-pdf-tools.md) |
 | DeepSeek Harness 配置 | [dsh 接入](skills/smedc-mcp/references/dsh-compat.md) |
+
+当前源码候选 `0.15.0` 统一使用 `in_store_orders` 与 `takeaway_orders`，尚未发布。
+批准安装 pin 保持 `0.14.0`；历史版本使用旧名 `settled_orders`。订单状态与数据集身份分开，
+相关操作须等待兼容客户端发布和匹配服务迁移完成。
 
 包发布、服务部署、租户激活和客户端验收分别取证。
 服务状态统一见[服务仓库的核验记录](https://github.com/YinXiaoyu-1998/SME_DATA_CENTER/blob/main/docs/implementation/staging-readiness.md)，

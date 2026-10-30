@@ -20,10 +20,16 @@ infrastructure or execute business reports.
 | Enterprise onboarding | [Admin UI entry](skills/smedc-mcp/references/tenant-onboarding.md) |
 | Permissions and controlled management | [Business authorization](skills/smedc-mcp/references/business-authorization.md) |
 | Cost-card directory and local CSV analysis | [Cost cards](skills/smedc-mcp/references/cost-cards.md) |
-| Complete settled-order snapshots | [Settled orders](skills/smedc-mcp/references/settled-orders.md) |
+| Complete in-store snapshots across all statuses | [In-store orders](skills/smedc-mcp/references/in-store-orders.md) |
+| Complete takeaway snapshots across all platforms | [Takeaway orders](skills/smedc-mcp/references/takeaway-orders.md) |
 | Platform review facts and identity | [Store reviews](skills/smedc-mcp/references/store-reviews.md) |
 | Service-generated daily PDF archives | [Ledger tools](skills/smedc-mcp/references/ledger-pdf-tools.md) |
 | DeepSeek Harness client configuration | [dsh wiring](skills/smedc-mcp/references/dsh-compat.md) |
+
+Canonical `in_store_orders` and `takeaway_orders` are implemented in source candidate `0.15.0`,
+which is not yet published. The approved installation pin remains `0.14.0`; that historical release
+used `settled_orders`. Follow the references only after compatible client publication and the
+matching service migration are verified. Order status is independent of dataset identity.
 
 Package publication, service deployment, tenant activation and client acceptance are separate.
 Current service evidence belongs to the [service repository's readiness record](https://github.com/YinXiaoyu-1998/SME_DATA_CENTER/blob/main/docs/implementation/staging-readiness.md).
