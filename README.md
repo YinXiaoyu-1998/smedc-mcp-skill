@@ -20,7 +20,7 @@ infrastructure or execute business reports.
 | Enterprise onboarding | [Admin UI entry](skills/smedc-mcp/references/tenant-onboarding.md) |
 | Permissions and controlled management | [Business authorization](skills/smedc-mcp/references/business-authorization.md) |
 | Cost-card directory and local CSV analysis | [Cost cards](skills/smedc-mcp/references/cost-cards.md) |
-| Complete in-store snapshots across all statuses | [In-store orders](skills/smedc-mcp/references/in-store-orders.md) |
+| Complete in-store snapshots within declared scope | [In-store orders](skills/smedc-mcp/references/in-store-orders.md) |
 | Complete takeaway snapshots across all platforms | [Takeaway orders](skills/smedc-mcp/references/takeaway-orders.md) |
 | Platform review facts and identity | [Store reviews](skills/smedc-mcp/references/store-reviews.md) |
 | Service-generated daily PDF archives | [Ledger tools](skills/smedc-mcp/references/ledger-pdf-tools.md) |

@@ -18,7 +18,7 @@
 | 企业入驻 | [管理员 UI 入口](skills/smedc-mcp/references/tenant-onboarding.md) |
 | 业务权限与受控管理 | [业务授权](skills/smedc-mcp/references/business-authorization.md) |
 | 成本卡目录与本地 CSV 分析 | [成本卡](skills/smedc-mcp/references/cost-cards.md) |
-| 店内订单全部状态的完整快照 | [店内订单指导](skills/smedc-mcp/references/in-store-orders.md) |
+| 店内订单声明范围内的完整快照 | [店内订单指导](skills/smedc-mcp/references/in-store-orders.md) |
 | 平台外卖全部平台的完整快照 | [外卖订单指导](skills/smedc-mcp/references/takeaway-orders.md) |
 | 平台评价事实与身份 | [门店评价](skills/smedc-mcp/references/store-reviews.md) |
 | 服务端每日 PDF 台账 | [台账工具](skills/smedc-mcp/references/ledger-pdf-tools.md) |
