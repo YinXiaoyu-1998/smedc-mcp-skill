@@ -1,7 +1,7 @@
 # SMEDC MCP Skill
 
 面向员工自有智能体的企业资料中枢（Small and Medium Enterprises Data Center）安装与 MCP 使用指导。
-已批准的包为 `smedc-mcp-launcher@0.15.0`，已公开发布并独立验证。
+已批准的包为 `smedc-mcp-launcher@0.16.0`，已公开发布并独立验证。
 当前安装权威入口为 [SKILL.md](skills/smedc-mcp/SKILL.md)。[English](README.md)。
 
 ## 范围与文档
@@ -18,14 +18,14 @@
 | 企业入驻 | [管理员 UI 入口](skills/smedc-mcp/references/tenant-onboarding.md) |
 | 业务权限与受控管理 | [业务授权](skills/smedc-mcp/references/business-authorization.md) |
 | 成本卡目录与本地 CSV 分析 | [成本卡](skills/smedc-mcp/references/cost-cards.md) |
-| 店内订单全部状态的完整快照 | [店内订单指导](skills/smedc-mcp/references/in-store-orders.md) |
+| 店内订单声明范围内的完整快照 | [店内订单指导](skills/smedc-mcp/references/in-store-orders.md) |
 | 平台外卖全部平台的完整快照 | [外卖订单指导](skills/smedc-mcp/references/takeaway-orders.md) |
 | 平台评价事实与身份 | [门店评价](skills/smedc-mcp/references/store-reviews.md) |
 | 服务端每日 PDF 台账 | [台账工具](skills/smedc-mcp/references/ledger-pdf-tools.md) |
 | DeepSeek Harness 配置 | [dsh 接入](skills/smedc-mcp/references/dsh-compat.md) |
 
-已发布并独立核验的 `0.15.0` 支持 `in_store_orders` 与 `takeaway_orders`。
-批准安装 pin 保持 `0.15.0`；历史版本使用旧名 `settled_orders`。订单状态与数据集身份分开，
+已发布并独立核验的 `0.16.0` 支持 `in_store_orders` 与 `takeaway_orders`。
+批准安装 pin 保持 `0.16.0`；历史版本使用旧名 `settled_orders`。订单状态与数据集身份分开，
 相关操作仍需核对匹配的服务迁移和当前授权。
 
 包发布、服务部署、租户激活和客户端验收分别取证。
@@ -55,7 +55,7 @@
 
 ## 正式 Launcher
 
-只使用 `smedc-mcp-launcher@0.15.0`，要求 Node.js 22+ 和 npm。
+只使用 `smedc-mcp-launcher@0.16.0`，要求 Node.js 22+ 和 npm。
 禁止安装 npm `latest` 或由 launcher 自更新。MCP entry 为 `smedc`，使用本地 stdio、
 一个 `serve` 参数和 `SMEDC_BASE_URL=https://api.smedatacenter.xyz`。
 平台路径、精确命令、自检和宿主配置统一见[安装流程](skills/smedc-mcp/SKILL.md#official-install-or-update)。
