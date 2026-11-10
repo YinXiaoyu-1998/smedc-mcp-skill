@@ -2,7 +2,7 @@
 
 Official installation and MCP usage guidance for employee-owned agents accessing SMEDC
 (Small and Medium Enterprises Data Center). The approved package is
-`smedc-mcp-launcher@0.16.0`, published and independently verified. Current installation authority
+`smedc-mcp-launcher@0.17.0`, published and independently verified. Current installation authority
 is [SKILL.md](skills/smedc-mcp/SKILL.md). [中文说明](README.zh.md).
 
 ## Scope And Documentation
@@ -26,7 +26,7 @@ infrastructure or execute business reports.
 | Service-generated daily PDF archives | [Ledger tools](skills/smedc-mcp/references/ledger-pdf-tools.md) |
 | DeepSeek Harness client configuration | [dsh wiring](skills/smedc-mcp/references/dsh-compat.md) |
 
-Published, independently verified launcher `0.16.0` supports canonical `in_store_orders` and
+Published, independently verified launcher `0.17.0` supports canonical `in_store_orders` and
 `takeaway_orders` and is the approved exact installation pin. Historical `0.14.0` used
 `settled_orders`. Confirm the matching service migration before operating on the new name.
 Order status remains independent of dataset identity.
@@ -61,7 +61,7 @@ or a general SMEDC update request.
 
 ## Official Launcher
 
-Use only `smedc-mcp-launcher@0.16.0`, with Node.js 22+ and npm. Never install npm `latest` or
+Use only `smedc-mcp-launcher@0.17.0`, with Node.js 22+ and npm. Never install npm `latest` or
 use launcher self-update. The MCP entry is `smedc`, configured as local stdio with one `serve`
 argument and `SMEDC_BASE_URL=https://api.smedatacenter.xyz`. Platform paths, exact commands,
 self-check and host setup live in [Official Install Or Update](skills/smedc-mcp/SKILL.md#official-install-or-update).
