@@ -99,13 +99,16 @@ Only a current active same-organization admin can call these controlled operatio
 
 ### Consolidated tools
 
-These signatures require the approved launcher `0.17.0` and matching service. Follow the
+These tools require the approved launcher and matching service. The published 0.17.0
+contract uses `employeeId` in the two account operations below. The 0.18.0 candidate
+uses `userAccountId` in those operations and requires its matching service rollout.
+Follow the connected tool schema and send only its declared account field. Follow the
 [core release boundary](../SKILL.md#business-permission-tools-and-release-boundary) before using them.
 Use `get_my_permissions {}` for the current employee's own live permission card.
 
 | Purpose                                                   | Tool and parameters                                                                                                                           |
 | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| List accounts or view one account                         | `query_account_permissions { query: { mode: "list" } }` or `{ query: { mode: "detail", employeeId } }`                                        |
+| List accounts or view one account                         | `query_account_permissions { query: { mode: "list" } }` or `{ query: { mode: "detail", userAccountId } }`                                     |
 | Read one directory section and its `authorizationVersion` | `get_permission_directory { section }` with `categories`, `dimensions` or `stores`                                                            |
 | Create an evidence category                               | `configure_business_category { expectedVersion, operation: { kind: "create_evidence", id, name, ownerships, requiredDimensionIds } }`         |
 | Update an evidence category                               | `configure_business_category { expectedVersion, operation: { kind: "update_evidence", categoryId, name, ownerships, requiredDimensionIds } }` |
@@ -123,7 +126,7 @@ check the actual category type.
 
 | Purpose                               | Tool and parameters                                                                                                                              |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Replace account configuration         | `update_account_permissions { employeeId, expectedVersion, clearance, grants }`                                                                  |
+| Replace account configuration         | `update_account_permissions { userAccountId, expectedVersion, clearance, grants }`                                                               |
 | Update a store                        | `update_business_store { enterpriseKey, name, expectedVersion }`                                                                                 |
 | Evidence attributes                   | `update_evidence_document_attributes { documentId, expectedVersion, categoryId, fileConfidentialityLevel, scopes, historicalSupplementReason? }` |
 | Safe evidence management status       | `get_evidence_document_management_status { documentId }`                                                                                         |
