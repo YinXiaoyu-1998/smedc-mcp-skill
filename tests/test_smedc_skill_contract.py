@@ -215,7 +215,9 @@ class SmedcSkillContractTests(unittest.TestCase):
             "LEDGER_PDF_BUNDLE_VERIFY_FAILED",
         ]:
             self.assertIn(text, reference)
-        self.assertNotIn("without fetching, proxying, caching", reference)
+        self.assertIn("give the employee the fresh", reference)
+        self.assertIn("Do not fetch, proxy, cache, or", reference)
+        self.assertIn("extract the ZIP from the link", reference)
         self.assertIn("download_ledger_pdf_bundle", self.skill_text)
         self.assertIn("ordinary deliverables", self.skill_text)
 

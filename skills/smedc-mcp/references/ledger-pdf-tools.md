@@ -1,13 +1,11 @@
 # Ledger PDF MCP Contracts
 
 Launcher **0.19.0 is published and independently verified**. The approved installation pin is
-`smedc-mcp-launcher@0.19.0`; install or update only through the core Skill's approved flow. Business MCP calls have a 45-second launcher deadline; connection and profile checks retain 30 seconds. Prepared bundle downloads are the exception: partitions allow 240 seconds and ledger bundles 600.
-These five tools also require service archive delivery enabled. Discover tools through the host
-MCP integration. If absent, verify the installed launcher version; if the service returns
-`LEDGER_PDF_NOT_ENABLED`, report archive delivery as unavailable until the service rollout is
-complete. Do not generate PDFs locally or change service flags. `download_ledger_pdf_bundle`
-requires launcher 0.20.0 or newer; on an older launcher the other four still work and the link flow
-below remains available.
+`smedc-mcp-launcher@0.19.0`; use the core Skill's approved installation flow. The local bundle
+tool is implemented in the 0.20.0 candidate and requires the verified launcher release, matching
+service deployment, and the tool in the host's local `smedc` integration before use. Verify that
+service archive delivery is enabled. On `LEDGER_PDF_NOT_ENABLED`, report that archive delivery is
+unavailable. Do not generate PDFs locally or change service flags.
 
 ## Inputs
 
@@ -53,24 +51,23 @@ returned partition pages before claiming complete success. A partition may be `e
 `failed`, or `superseded`; superseded generation is not successful fulfillment. Follow a returned
 latest request reference only when visible. Do not treat partial success as a complete archive.
 
-Status never returns download URLs or PDF bytes. To bring the files into the conversation, call
-`download_ledger_pdf_bundle`: the launcher resolves the signed link itself, verifies the archive,
+Status never returns download URLs or PDF bytes. When local delivery is available, call
+`download_ledger_pdf_bundle` for local files: the launcher resolves the signed link itself, verifies the archive,
 extracts the daily PDFs, and returns `localDirectory`. The extracted PDFs are ordinary
 deliverables — open them, quote them, forward them, or process them further as the employee asks.
 
-Call `get_ledger_pdf_download_url` only when the employee wants a link to open on their own
-device. It returns a **fresh** `downloadUrl` and `expiresAt`, `byteSize`, and
-`checksumSha256`. The signed URL expires in **15 minutes**; the ZIP is retained for **24 hours**.
-Request a fresh URL if only the signature expired; prepare again with a new key if the ZIP expired
-or became stale. Do not cache a link for a later request, and do not put archive bytes into model
-context as base64.
+If local delivery is unavailable or the employee wants a clickable download, call
+`get_ledger_pdf_download_url` and give the employee the fresh
+`downloadUrl` and its `expiresAt`. The employee opens the link. Do not fetch, proxy, cache, or
+extract the ZIP from the link, or emit archive bytes as base64. The link lasts up to **15 minutes**;
+the ZIP is retained **24 hours**. Request a fresh link if only the signature expired; prepare again
+with a new key if the ZIP expired or became stale.
 
-The service checks current authorization to every ledger, supplier, and certificate source for
-coverage, status, preparation, and every URL issuance. Prior access or a completed request grants
-no continuing permission. `unavailable`, missing, or forbidden facts reveal no hidden source IDs,
-storage keys, permissions, counts, or business detail; report only the safe returned status/error.
-Do not remove photos or sources to bypass a denial. Source authorization applies to the entire
-published partition PDF, not a client-side filtered subset.
+The service checks the employee's current finished-PDF authorization on coverage, status,
+preparation, and every URL issuance. Prior access or a completed request grants no continuing
+permission. Report only the safe returned status or error.
+Do not remove photos or sources to bypass a denial. Finished-PDF authorization applies to each
+whole published PDF.
 
 ## Local Bundle Download
 
@@ -81,9 +78,8 @@ internally and never returns it. It verifies the archive against the response `b
 `localDirectory`, `requestId`, `fileCount`, and relative `files[]`, with `manifest.json`
 beside them.
 
-- Budget one call at **10 minutes**, at most **1 GiB**, and at most **5,000** PDFs. A wider scope
-  needs a narrower store/date selection, not a longer retry; suggest splitting above roughly
-  256 MiB or by store/day.
+- Budget one call at **10 minutes**, at most **1 GiB** of PDF content plus ZIP overhead, and at most **5,000**
+  PDFs. For larger scopes or timeouts, suggest splitting by store or date.
 - The whole bundle is rejected before extraction when an entry is not a statutory PDF, duplicates
   or traverses a path, violates the STORE layout, or fails the size/checksum check. No partial
   output is returned.
@@ -91,12 +87,9 @@ beside them.
   re-uploading them elsewhere is the employee's decision; this skill places no restriction on that.
 - Launcher errors: `LEDGER_PDF_BUNDLE_URL_INVALID` (link missing, expired, or mismatched),
   `LEDGER_PDF_BUNDLE_VERIFY_FAILED` (archive failed validation),
-  `LEDGER_PDF_BUNDLE_DOWNLOAD_TIMEOUT` (retry with a narrower scope). Service codes such as
-  `LEDGER_PDF_BUNDLE_STALE`, `LEDGER_PDF_NOT_READY`, or `LEDGER_PDF_BUNDLE_LIMIT_EXCEEDED`
-  keep their usual meaning.
-- On a launcher without the tool, the employee may still ask you to fetch the signed link yourself
-  and extract it locally. Apply the same verification, no-caching, and no-binary-in-context rules;
-  never fabricate or substitute ledger content.
+  `LEDGER_PDF_BUNDLE_DOWNLOAD_TIMEOUT` (timeout), and
+  `LEDGER_PDF_BUNDLE_LIMIT_EXCEEDED` (split by store/date). Service codes such as
+  `LEDGER_PDF_BUNDLE_STALE` or `LEDGER_PDF_NOT_READY` keep their usual meaning.
 
 ## Errors And Query Cutover
 
