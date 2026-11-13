@@ -602,6 +602,12 @@ Do not send `startDate` or `endDate`.
   including for admins and older clients. Use the finished PDF workflow only; do not try old
   aggregate selectors or feature flags. Read
   [ledger PDF tool contracts](references/ledger-pdf-tools.md) for archive parameters and errors.
+- When the employee wants the ledger files themselves, call `download_ledger_pdf_bundle`
+  (launcher 0.20.0+). The launcher fetches the ZIP, verifies its byte size and SHA-256, extracts the
+  daily PDFs, and returns `localDirectory`; the signed link never reaches the agent. Extracted PDFs
+  are ordinary deliverables: hand them over, quote them, forward them, or process them further
+  without an extra restriction. Use `get_ledger_pdf_download_url` only when the employee wants a
+  link to open on another device or the tool is absent.
 - `supplier_catalog` is the current supplier snapshot used for delivery-ledger enrichment. Upload
   the provided supplier catalog file as-is; do not rewrite it locally to match registry metadata.
   The service validates required and optional columns after upload. The latest successfully applied
