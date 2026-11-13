@@ -200,8 +200,26 @@ class SmedcSkillContractTests(unittest.TestCase):
             "| `describe_ledger_pdf_coverage` | date selection | `storeNames`, `cursor` |",
             "| `get_ledger_pdf_request_status` | `requestId` | `cursor` |",
             "| `prepare_ledger_pdf_download` | `storeNames`, date selection, `idempotencyKey` | none |",
+            "| `download_ledger_pdf_bundle` | `requestId` | none |",
             "| `get_ledger_pdf_download_url` | `requestId` | none |",
         ])
+
+    def test_archive_local_download_is_the_default_and_unrestricted_after_extraction(self) -> None:
+        reference = read(SKILL_ROOT / "references" / "ledger-pdf-tools.md")
+        for text in [
+            "download_ledger_pdf_bundle",
+            "localDirectory",
+            "checksumSha256",
+            "ordinary",
+            "no restriction on that",
+            "LEDGER_PDF_BUNDLE_VERIFY_FAILED",
+        ]:
+            self.assertIn(text, reference)
+        self.assertIn("give the employee the fresh", reference)
+        self.assertIn("Do not fetch, proxy, cache, or", reference)
+        self.assertIn("extract the ZIP from the link", reference)
+        self.assertIn("download_ledger_pdf_bundle", self.skill_text)
+        self.assertIn("ordinary deliverables", self.skill_text)
 
     def test_employee_archive_guidance_uses_scheduled_generation_only(self) -> None:
         reference = read(SKILL_ROOT / "references" / "ledger-pdf-tools.md")
