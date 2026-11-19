@@ -52,6 +52,12 @@ class SmedcSkillContractTests(unittest.TestCase):
             ]
         )
 
+    def test_discovery_names_both_brands_with_the_stable_skill_id(self) -> None:
+        metadata = self.skill_text.split("---", 2)[1]
+        self.assertIn("name: smedc-mcp\n", metadata)
+        self.assertIn("企业智脑（SMEDC）", metadata)
+        self.assertIn("$smedc-mcp", self.openai_yaml)
+
     def test_current_smedc_contract_is_documented(self) -> None:
         expected_terms = [
             "smedc-mcp",

@@ -1,6 +1,6 @@
-# SMEDC MCP Skill
+# 企业智脑 MCP Skill
 
-面向员工自有智能体的企业资料中枢（Small and Medium Enterprises Data Center）安装与 MCP 使用指导。
+面向员工自有智能体的企业智脑（SMEDC）安装与 MCP 使用指导。
 已批准的包为 `smedc-mcp-launcher@0.21.0`，已公开发布并独立验证。
 当前安装权威入口为 [SKILL.md](skills/smedc-mcp/SKILL.md)。[English](README.md)。
 
@@ -51,7 +51,8 @@
 均指向 [YinXiaoyu-1998/smedc-mcp-skill](https://github.com/YinXiaoyu-1998/smedc-mcp-skill)
 默认分支的最新 `skills/smedc-mcp/`。获取、备份、替换、验证和清理遵循[更新流程](skills/smedc-mcp/references/update-skill.md)。
 完成后报告来源 commit、安装路径和重载状态。只更新 Skill 保留 launcher 与登录会话；
-升级 launcher 需要单独的升级请求或一般 SMEDC 更新请求。
+仅刷新时也可以说“只更新 smedc-mcp 这个 Skill，不升级 launcher”。
+“帮我升级一下 SMEDC”或“帮我升级一下企业智脑”会核验基础 Skill、按批准的 pin 更新已有连接，并检查本机已有官方定时任务（含暂停任务）和读回结果。旧版可先用英文名或 Skill ID。
 
 ## 正式 Launcher
 
