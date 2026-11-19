@@ -52,7 +52,7 @@
 默认分支的最新 `skills/smedc-mcp/`。获取、备份、替换、验证和清理遵循[更新流程](skills/smedc-mcp/references/update-skill.md)。
 完成后报告来源 commit、安装路径和重载状态。只更新 Skill 保留 launcher 与登录会话；
 仅刷新时也可以说“只更新 smedc-mcp 这个 Skill，不升级 launcher”。
-“帮我升级一下 SMEDC”或“帮我升级一下企业智脑”会核验基础 Skill、按批准的 pin 更新已有连接，更新本机已安装的官方配套 Skill，包括没有对应定时任务的副本，并读回验证本机已有官方定时任务（含暂停任务）。旧版可先用英文名或 Skill ID。
+“帮我升级一下 SMEDC”或“帮我升级一下企业智脑”会核验基础 Skill、按批准的 pin 更新已有连接，更新本机所有已安装的官方配套 Skill，并读回验证本机已有官方定时任务（含暂停任务）。旧版可先用英文名或 Skill ID。
 
 ## 正式 Launcher
 
