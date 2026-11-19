@@ -67,7 +67,7 @@
 
 [smedc-companion-skills](https://github.com/YinXiaoyu-1998/smedc-companion-skills)
 维护 `smedc-business-analysis`、`smedc-delivery-ledger` 和独立美团工作流。
-仅安装用户请求的 companion；核心安装／更新不隐含安装或更新配套技能。
+新配套技能由用户选择安装。仅刷新基础 Skill 时保留已安装的配套技能；通用升级按[升级规程](skills/smedc-mcp/references/upgrade-cleanup.md)处理本机已有官方任务及所需依赖。
 Companion 使用核心 Skill 批准的 launcher pin，并各自维护业务流程。
 
 ## 维护
