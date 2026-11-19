@@ -58,6 +58,13 @@ class SmedcSkillContractTests(unittest.TestCase):
         self.assertIn("企业智脑（SMEDC）", metadata)
         self.assertIn("$smedc-mcp", self.openai_yaml)
 
+    def test_general_upgrade_refreshes_existing_companions_without_tasks(self) -> None:
+        upgrade = read(SKILL_ROOT / "references" / "upgrade-cleanup.md")
+        self.assertIn("给我升级一下 SMEDC", self.skill_text)
+        self.assertIn("even without scheduled tasks", self.skill_text)
+        self.assertIn("including standalone copies with no scheduled tasks", upgrade)
+        self.assertIn("#refresh-installed-companions-during-a-general-upgrade", upgrade)
+
     def test_current_smedc_contract_is_documented(self) -> None:
         expected_terms = [
             "smedc-mcp",

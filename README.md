@@ -56,7 +56,7 @@ resolve to the latest default-branch `skills/smedc-mcp/` revision from
 [YinXiaoyu-1998/smedc-mcp-skill](https://github.com/YinXiaoyu-1998/smedc-mcp-skill).
 The [update procedure](skills/smedc-mcp/references/update-skill.md) owns retrieval, backup,
 replacement, verification and cleanup. Report source commit, installation path and reload status.
-“Update only the smedc-mcp Skill” refreshes its files and preserves the launcher and login session. “Upgrade SMEDC” verifies the core Skill, aligns existing integrations to its exact pin, and updates and verifies existing official scheduled workflows, including paused tasks.
+“Update only the smedc-mcp Skill” refreshes its files and preserves the launcher and login session. “Upgrade SMEDC” verifies the core Skill, aligns existing integrations to its exact pin, refreshes all already-installed official companion Skills even without scheduled tasks, and updates and verifies existing official scheduled workflows, including paused tasks.
 
 ## Official Launcher
 
@@ -72,7 +72,7 @@ self-check alone does not prove the host has reconnected to the new launcher.
 
 [smedc-companion-skills](https://github.com/YinXiaoyu-1998/smedc-companion-skills) maintains
 `smedc-business-analysis`, `smedc-delivery-ledger` and independent Meituan workflows. Install only
-requested companions. A core Skill-only refresh leaves companions in place. During a general upgrade, use the [workflow upgrade procedure](skills/smedc-mcp/references/upgrade-cleanup.md) for dependencies of already installed official tasks. Companions
+requested companions. A core Skill-only refresh leaves companions in place. The [general upgrade procedure](skills/smedc-mcp/references/upgrade-cleanup.md) refreshes standalone companions and preserves the verified update path for existing tasks. Companions
 use this core Skill's approved launcher pin while owning their business workflows.
 
 ## Maintenance
