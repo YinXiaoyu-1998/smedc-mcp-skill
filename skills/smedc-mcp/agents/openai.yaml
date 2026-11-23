@@ -1,4 +1,4 @@
 interface:
   display_name: "企业智脑 MCP"
-  short_description: "企业智脑（SMEDC）：管理员上传文件，员工按权限查询企业资料与经营数据"
+  short_description: "企业智脑（SMEDC）：上传与查询资料，发现门店巡检问卷候选能力"
   default_prompt: "Use $smedc-mcp to query authorized business data in SMEDC."
