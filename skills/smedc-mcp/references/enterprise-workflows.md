@@ -17,13 +17,13 @@ passwords in chat or create accounts/roles through a workaround. Current admin i
 workflow configuration, installation and runs; business content still needs its own grants.
 
 The versioned workflow feature requires the companion manifest's compatible launcher/service.
-Launcher `0.22.2` is published, independently verified and approved for installation, including
+Launcher `0.23.0` is published, independently verified and approved for installation, including
 workflow tools and explicit order scope. Install it through this core skill's exact-pin procedure;
 then verify live service capability and current administrator authorization before workflow setup.
 If capability is unavailable, report that service gap. Do not substitute `latest`, raw JSON-RPC
 or a separate credentialed HTTP client.
 
-Scheduled `combo_sales` uploads require a matching deployed service, launcher 0.22.2 or newer, and workflow package 1.0.12 or newer. For a task using a standing `dishes` grant to upload combo sales, upgrade the existing host task in place to workflow package 1.0.14 or newer and verify its package pin and central registration. Hosts pinned to 1.0.12 or 1.0.13 look for an explicit `combo_sales` grant.
+Scheduled `combo_sales` uploads require a matching deployed service, launcher 0.23.0 or newer, and workflow package 1.0.12 or newer. For a task using a standing `dishes` grant to upload combo sales, upgrade the existing host task in place to workflow package 1.0.14 or newer and verify its package pin and central registration. Hosts pinned to 1.0.12 or 1.0.13 look for an explicit `combo_sales` grant.
 
 In 自动任务 → 每日美团入库, select 套餐销售统计 in the collection scope. For a new standing upload grant, select 菜品销售 (`dishes`) for the intended stores. An existing combo-only grant still covers just combo sales at its granted stores. Employee reads require the corresponding same-store `dishes` permission and clearance. Submit each verified single-day original with a workflow upload binding and check for `published`.
 
@@ -34,7 +34,7 @@ package revision, including resume; never report `1.0.0` to bypass an incompatib
 
 Choose the configuration query according to the
 [core release boundary](../SKILL.md#business-permission-tools-and-release-boundary).
-Use the approved launcher `0.22.2` with the matching service:
+Use the approved launcher `0.23.0` with the matching service:
 
 - Call `query_enterprise_workflows { query: { mode: "list" } }` to verify live capability/version and
   retrieve the authenticated enterprise catalog and official settings entry. The list branch accepts
@@ -67,7 +67,7 @@ remain non-replayable after local state loss. Durable action history may outlive
 detail, but it does not authorize resuming an expired or finished run.
 
 This inventory is an additive server response on the existing strict input contract;
-the approved launcher `0.22.2` forwards it without a new tool or transport. Verify the
+the approved launcher `0.23.0` forwards it without a new tool or transport. Verify the
 matching service response before relying on it. It carries no original files, review bodies,
 report content or credentials, and does not grant ordinary business reads.
 
