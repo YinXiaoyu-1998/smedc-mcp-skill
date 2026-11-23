@@ -6,9 +6,10 @@ description: >-
   员工要维护总部套餐、查询实际售出的套餐子菜或核对其部门归属时也使用本技能。
   用户要求更新 smedc-mcp 或 smedc-mcp-skill 这个 skill 时也使用本技能。
   用户询问 SMEDC 的配套分析、报表或扩展 skill 时也使用本技能。
+  用户询问企业智脑门店巡检问卷、巡检照片或巡检配套 Skill 时也使用本技能。
   安装或升级企业智脑（SMEDC）、选择企业自动任务或换电脑恢复工作流时也使用本技能。
   企业入驻资料准备、新账号业务授权与管理员 MCP 权限配置时也使用本技能；不负责创建组织、账号或处理密码。
-  Also use when users ask about optional SMEDC analysis, reporting, or extension skills.
+  Also use when users ask about optional SMEDC analysis, reporting, inspection, or extension skills.
   Also covers updating this skill from its official GitHub source and installing, configuring,
   and authenticating the official SMEDC remote MCP
   launcher (api.smedatacenter.xyz); accesses SMEDC through the launcher only and never exposes employee
@@ -119,6 +120,37 @@ private migration. The approved `0.22.2` launcher includes the workflow contract
 service capability and current authorization before setup or execution. Installation does not
 activate workflows or migrate existing tasks.
 
+## Inspection Questionnaires (Candidate Launcher, Service Gated)
+
+For authorized store inspection questionnaires, evidence-backed answers, photo references, or
+template drafts, use the optional [`smedc-inspection` companion](#optional-companion-skills).
+The four inspection tools `query_inspections`, `manage_inspection_templates`,
+`write_inspections`, and `upload_inspection_photo` are candidate contracts bundled in the
+launcher `0.23.0` source candidate. They are not part of the approved installation pin
+`smedc-mcp-launcher@0.22.2`. Do not install this candidate as the employee upgrade or derive an
+approved pin from source or server metadata. Keep the approved pin unchanged unless a later release
+is published, independently verified, and explicitly approved here.
+
+Check the connected host for the tools required by the requested action, then verify live scope
+permission. `query_inspections` action `context` reports
+`canReadInspections` and `canFillInspections` for the exact enterprise, store, and date;
+`canManageInspectionTemplates` covers template drafts. With `includeInspection: true`,
+`smedc_get_current_user` reports only any-scope navigation capabilities, not permission for a
+specific sheet or photo. Tool discovery does not prove service deployment, tenant enablement,
+authorization, or release. If a tool, service capability, or current target permission is missing,
+report the specific gap. Use the launcher for Agent operations. Employees can fill authorized sheets
+in the Web UI when their local original cannot be read by the launcher.
+
+`upload_inspection_photo` is a candidate photo upload gated by current store fill
+(`canFillInspections`) permission in the exact scope, not by the `admin` role. An ordinary
+`employee` with that grant may upload one original JPEG/PNG through the launcher; an admin
+without the grant may not. The launcher verifies the exact fill preflight and reads an absolute
+local path, and the service rechecks permission and the actual bytes. A successful upload returns
+`photoId` and `expiresAt`; do not poll `get_import_status` for it. This candidate photo surface
+is not one of the admin-only document uploads below. The companion owns sheet selection, evidence,
+photo references, retries, and template drafts; this base skill owns installation, login,
+availability, and permission checks.
+
 ## Optional Companion Skills
 
 Companion skills are independently maintained workflows that use SMEDC MCP data. They
@@ -136,6 +168,13 @@ access; a companion owns its business-specific analysis and deliverables.
   When the employee asks for those ledger deliverables and the companion is installed, use it
   together with this skill instead of recreating ledger-specific
   presentation logic here.
+- [`smedc-inspection`](https://github.com/YinXiaoyu-1998/smedc-companion-skills)
+  reads and fills authorized store inspection questionnaires, attaches evidence-backed photo
+  references, and prepares template drafts for explicit review and activation. It is optional and
+  requires matching launcher tools, service support, and current store or template permission.
+  `smedc_list_skills` may return approved metadata for `smedc-inspection` in a configured organization; directory metadata does not prove the candidate tools are installed or the service
+  is enabled. When the employee asks for an inspection workflow and the companion is installed, use
+  it together with this skill; the web page remains usable without it.
 - If the matching companion is not installed, explain that it is optional, identify its official
   source, and offer to install it. Install it only when the employee explicitly authorizes its
   installation or has already requested that named companion or all recommended companions.
@@ -143,8 +182,8 @@ access; a companion owns its business-specific analysis and deliverables.
 - Updating this skill does not update a companion, and updating a companion does not change this
   skill or the launcher pin. Follow each repository's own update guidance.
 
-Do not copy companion-specific report logic, dataset transformations, or business conclusions into
-this base skill. Keep the core boundary below and route only the matching employee request.
+Do not copy companion-specific report logic, dataset transformations, inspection questionnaire
+flows, or business conclusions into this base skill. Keep the core boundary below and route only the matching employee request.
 
 ## Hard Boundaries
 
@@ -211,27 +250,33 @@ discover them by hand.
   stale skill guidance through Update This Skill before choosing the approved exact launcher
   version. Follow Official Install Or Update; never update silently in the background.
 
-## Admin-Only Uploads
+## Admin-Only Uploads (Evidence, Structured, Quarantine)
 
-Only active accounts with role `admin` may upload evidence documents, structured datasets
-(including Delivery Ledger / `delivery_ledger`), and quarantine certificates. The three upload
-tools remain visible and are marked admin-only. Do not dynamically hide or remove upload tools.
-The same role is required by `upsert_dish_catalog`, which writes structured catalog rows without
-uploading a file; it is not one of the three upload tools.
+For the three existing document/data upload tools — `upload_evidence_document`,
+`upload_structured_dataset` (including Delivery Ledger / `delivery_ledger`), and
+`upload_quarantine_certificate` — only active accounts with role `admin` may upload. These three
+tools remain visible and are marked admin-only; do not dynamically hide or remove them.
+`upsert_dish_catalog` also requires the admin role but is not an upload tool.
+`upload_inspection_photo` is not covered by this section: when the candidate inspection tools are
+present, that photo upload is gated by current store fill permission (see Inspection Questionnaires).
 
-Before handling an upload, resolve an unknown role with `smedc_get_current_user`. For a known
-`employee` role, do not read or transform the local file, encode bytes, or call an upload tool.
-Explain that an admin must upload the original file. Launcher 0.22.2 also preflights its authenticated
-profile before local file access. Its cached profile contains exactly `displayName`, `email`,
-`role`, `clearance`, and `organizationName`; current-user questions still use the live tool.
+Before handling one of these three uploads, resolve an unknown role with
+`smedc_get_current_user`. For a known `employee` role, do not read or transform the local file,
+encode bytes, or call one of these three upload tools. Explain that an admin must upload the
+original file. This role preflight does not block a separate inspection photo upload for which the
+same account has store fill permission. Launcher 0.22.2 also preflights its authenticated profile
+before local file access. Its cached profile contains exactly `displayName`, `email`, `role`,
+`clearance`, and `organizationName`; current-user questions still use the live tool.
 
-Direct HTTP upload endpoints return HTTP `403`. MCP JSON-RPC transport returns HTTP `200`
-with `isError: true` in the tool result. Both carry `UPLOAD_ADMIN_REQUIRED`, the exact message
-`File upload requires the admin role.`, and `retryable: false`. Do not re-login or retry
-after this denial, change clearance, switch transport, or attempt to bypass it. A local preflight
-denial creates no backend audit; a backend denial best-effort records `file_upload.denied`.
+The three admin-only upload surfaces return HTTP `403` to direct HTTP calls. MCP JSON-RPC transport
+returns HTTP `200` with `isError: true` in the tool result. Both carry `UPLOAD_ADMIN_REQUIRED`, the
+exact message `File upload requires the admin role.`, and `retryable: false`. Do not re-login or
+retry after this denial, change clearance, switch transport, or attempt to bypass it. A local
+preflight denial creates no backend audit; a backend denial best-effort records
+`file_upload.denied`.
 
-Clearance is not upload permission. Employees at clearance 3 still cannot upload. Admins may
+Clearance is not upload permission. Employees at clearance 3 still cannot use these three
+admin-only upload tools. Admins may
 upload evidence with an explicit level 0–3, category and complete scopes, including above their own clearance. Fixed-category uploads use the current category level after activation; an old upload level cannot change it. This does not grant ordinary read access. Status, manifest, search, query, and download use current server business authorization; uploader progress is separate from content access. Partition create/parts/complete require
 admin; owner abort remains allowed. The service source requires launcher 0.12.0 or newer for OAuth issuance and refresh;
 older launchers receive `LAUNCHER_UPGRADE_REQUIRED`. Use the approved installation pin above.
@@ -243,7 +288,7 @@ Upload original files and report service validation errors. This skill does not 
 dataset-specific transformations. Future service identities require a separate design; they must
 not impersonate an admin Employee Account.
 
-The evidence/photo transport fields are bundled in approved launcher 0.22.2 and require the
+The evidence and quarantine-photo transport fields are bundled in approved launcher 0.22.2 and require the
 matching service rollout. A Skill-only update does not upgrade an older installed launcher.
 If the connected tools lack the fields, follow the approved launcher update procedure; do not
 switch to direct HTTP or strip required attributes.
@@ -262,6 +307,8 @@ Keep tool input within the public service contract:
   exception: path-mode multipart upload streams one original CSV/XLSX up to the current 2 GiB
   service limit without placing file bytes in the MCP argument. A basename-only filename is at
   most 255 characters;
+- a candidate inspection photo is one original JPEG or PNG from 1 byte through 10 MiB; the
+  launcher and service validate the declared and actual media type;
 - an evidence title is at most 512 characters and `sourceSystem` is at most 255 characters;
 - structured `enterpriseName` and `idempotencyKey` are each at most 255 characters;
 - receipt IDs and quarantine-certificate `idempotencyKey` values are each at most 255 characters;
