@@ -161,16 +161,11 @@ payload, and returns `{costCardId, archived: true, revision}` with a string revi
 hard deletion. Both new tools require the matching service rollout and tenant configuration;
 do not bypass through HTTP if the approved launcher lacks them.
 
-Existing enabled enterprises must also configure the new category: use the controlled current
-admin configuration initialization write to idempotently register missing `cost_cards`, then set
-its level and explicit group grants through the existing UI/MCP flow. In the UI, use
-“补齐资料类别 / Add missing categories” after saving or resolving unsaved drafts. It submits the
-current string `expectedVersion`; success returns string `authorizationVersion` and
-`value.createdCount`. Resolve a version conflict through fresh configuration comparison, never
-blind replay. The browser enforces its same Origin and CSRF token, plus current admin/tenant.
-New category starts with null level and no default grants; existing categories, grants and tenant mode stay unchanged.
-Ordinary GET/query never initializes configuration. Deployment does not authorize real tenant
-changes, backfills or cleanup.
+After the matching service rollout, open or refresh the fixed category list to find `cost_cards`.
+New categories begin with an unset level and no default grants.
+The administrator sets its level and explicit group grants through the existing UI or MCP flow.
+Existing category settings, grants and organization mode are preserved by registration.
+A missing category after rollout is a service migration issue for the operator.
 
 For sales association, the companion uses `matched_product_name` first and `product_name`
 only when the first is empty/unmatched. Multiple candidates retain ambiguity; no name foreign
