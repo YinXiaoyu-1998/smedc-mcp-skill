@@ -131,7 +131,7 @@ The four inspection tools `query_inspections`, `manage_inspection_templates`,
 Use `create_active` to validate, create and activate a finished template in one request,
 or use `create_draft` when the user asks to save a draft for review. The legacy `create`
 action saves a draft. If the formal creation action is unavailable, report that capability
-gap.
+gap. Author questions with a title and components.
 
 Check the connected host for the tools required by the requested action, then verify live scope
 permission. `query_inspections` action `context` reports
