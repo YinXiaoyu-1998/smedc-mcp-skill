@@ -34,8 +34,9 @@ copy of this skill; after a skill refresh, read the newly verified copy for its 
 ## Business Permission Tools And Release Boundary
 
 Launcher `0.23.1` is published, independently verified, and approved for installation. The
-following current business-permission contract requires the matching service rollout and explicit
-tenant activation; package installation alone does not activate a live tenant. Follow
+following current business-permission contract requires the matching service rollout and enabled
+organization authorization. New enterprises start enabled at operator onboarding. Older enterprises
+in preparation use the separate cutover process. Follow
 [business permissions and controlled management](references/business-authorization.md) when
 those tools are available. Permission checks always happen on the service; cached identity is
 not a permission card and does not authorize content.

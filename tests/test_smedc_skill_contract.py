@@ -115,7 +115,7 @@ class SmedcSkillContractTests(unittest.TestCase):
         self.assertIn("importBatch.publicationSummary", guide)
         self.assertIn("readable `sourceSheetSummary` remains an array", guide)
         for invariant in ["metadataPolicy: \"none\"", "selection is flat", "retryable 409",
-                          "value.createdCount", "saving or resolving unsaved drafts",
+                          "open or refresh the fixed category list",
                           "get_import_status({importBatchId})", "cost_card_<costCardId>.csv",
                           "archive_cost_card({costCardId})", "plus `fileName`", "Revoked access returns 404"]:
             self.assertIn(invariant, guide)

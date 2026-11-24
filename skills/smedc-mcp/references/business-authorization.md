@@ -136,10 +136,10 @@ intake, use the current official name from the business directory, even when the
 | Read-only preparation                 | `prepare_authorization_cutover {}`                                                                                                               |
 | Explicit activation / read suspension | `activate_authorization_cutover` / `suspend_authorization_reads { expectedVersion, confirm: true }`                                              |
 
-Read current directories/configuration before writing. The service initializes the registered fixed categories through deployment migration for existing
-tenants and account onboarding for new tenants.
-Initialization preserves existing IDs, levels and retirement choices; new levels remain unset and no
-grants or activation are inferred. Use IDs returned by the category directory. Never invent
+Read current directories/configuration before writing. The service registers fixed categories at
+onboarding and through release migration for existing organizations. Registration preserves existing
+IDs, levels, retirement choices, grants and modes. New categories start with an unset level and empty
+grants. New organizations start in enabled mode. Use IDs returned by the category directory. Never invent
 `fixed:…` IDs or create an evidence category to replace a missing fixed category. If the service
 still reports a missing fixed category, report incomplete service initialization to its operator.
 Readable fixed categories require administrator-declared levels. In the directory candidate,
@@ -199,12 +199,7 @@ original-file semantics from the core Skill.
 
 ## Cost-card category
 
-The cost-card flow uses enterprise group-level `cost_cards`, separate from
-recipe applicable stores and source-original access. Existing enabled enterprises use the
-controlled current-admin initialization write to register missing categories idempotently;
-then explicitly set the new category level and grants. In the UI, “补齐资料类别 /
-Add missing categories” requires saving or resolving unsaved drafts first. Initialization takes
-current string expectedVersion and returns string authorizationVersion with value.createdCount;
-current admin/tenant, version, same-origin and browser CSRF checks remain mandatory. GET is
-read-only. Null level/no grants never defaults to level zero or full access. Existing categories and mode stay unchanged. See
-[cost-card workflow](cost-cards.md) before upload, lookup, CSV download or archive.
+The cost-card flow uses enterprise group-level `cost_cards`. After the matching service rollout,
+the registered category is visible in Admin Console and directory reads. Set its level and explicit
+group grants through the existing UI or MCP flow. See [cost-card workflow](cost-cards.md) before
+upload, lookup, CSV download or archive.
