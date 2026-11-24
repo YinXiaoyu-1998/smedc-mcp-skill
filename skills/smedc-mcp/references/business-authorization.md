@@ -127,14 +127,13 @@ intake, use the current official name from the business directory, even when the
 
 ### Separate administration tools
 
-| Purpose                               | Tool and parameters                                                                                                                              |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Replace account configuration         | `update_account_permissions { userAccountId, expectedVersion, clearance, grants }`                                                               |
-| Update a store                        | `update_business_store { enterpriseKey, name, expectedVersion }`                                                                                 |
-| Evidence attributes                   | `update_evidence_document_attributes { documentId, expectedVersion, categoryId, fileConfidentialityLevel, scopes, historicalSupplementReason? }` |
-| Safe evidence management status       | `get_evidence_document_management_status { documentId }`                                                                                         |
-| Read-only preparation                 | `prepare_authorization_cutover {}`                                                                                                               |
-| Explicit activation / read suspension | `activate_authorization_cutover` / `suspend_authorization_reads { expectedVersion, confirm: true }`                                              |
+| Purpose                         | Tool and parameters                                                                                                                              |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Replace account configuration   | `update_account_permissions { userAccountId, expectedVersion, clearance, grants }`                                                               |
+| Update a store                  | `update_business_store { enterpriseKey, name, expectedVersion }`                                                                                 |
+| Evidence attributes             | `update_evidence_document_attributes { documentId, expectedVersion, categoryId, fileConfidentialityLevel, scopes, historicalSupplementReason? }` |
+| Safe evidence management status | `get_evidence_document_management_status { documentId }`                                                                                         |
+| Read suspension                 | `suspend_authorization_reads { expectedVersion, confirm: true }`                                                                                 |
 
 Read current directories/configuration before writing. The service registers fixed categories at
 onboarding and through release migration for existing organizations. Registration preserves existing
@@ -147,12 +146,9 @@ Readable fixed categories require administrator-declared levels. In the director
 retains its internal category identity and complete enterprise/store/source associations, without
 an administrator level or ordinary read grant. `ledger_pdf` keeps its own level and grants;
 existing stored internal levels are preserved and never open raw-ledger reads.
-This separation requires the matching service rollout. If preparation still requests a
-`delivery_ledger` level, report the service-version mismatch to the operator; do not fill 0/3,
-delete the internal category, or bypass the gate. `INTERNAL_CATEGORY_REQUIRED` means service
-initialization is incomplete, not that the administrator must choose a ledger level.
+Missing internal categories require operator attention.
 
-Listing and preparation are read-only. A fixed-category edit accepts only its
+Listing is read-only. A fixed-category edit accepts only its
 `confidentialityLevel` model; evidence edits accept `ownerships` and `requiredDimensionIds` instead.
 Directory mutations optionally accept `retired`; they do not automatically grant access. A grant
 contains `id`, same-organization `orgId`, `enterpriseKey`, `categoryIds`, `ownership`, `dimensions`,
@@ -163,21 +159,17 @@ There is no arbitrary API-path or SQL tool. Account roles, password setup and cr
 outside these permission tools. Viewing/modifying configuration does not grant immediate content
 access beyond the saved rules. Never manufacture grants or decide the user's policy for them.
 
-Preparation lists missing configuration and attributes. Activation requires the admin's explicit
-confirmation after the report is ready, then rechecks the current version atomically. This guide
-does not itself authorize changing a real tenant or suspending its reads. A suspended tenant does
-not restore legacy access; report the result and refer recovery to its administrator.
+A suspension requires current administrator confirmation and a matching version. Refer recovery to the operator.
 
 ## Errors, status and downloads
 
-- `AUTHORIZATION_VERSION_CONFLICT`: reload the current configuration/preparation report. Preserve
+- `AUTHORIZATION_VERSION_CONFLICT`: reload the current configuration. Preserve
   the user's intent; do not blindly replay a stale write or invent a replacement version.
 - `AUTHORIZATION_ADMIN_REQUIRED` / ordinary permission denial: explain the current named reason.
   Permission names may be stated plainly. Do not retry login as a permission bypass.
-- `RESOURCE_ATTRIBUTES_NOT_READY`, `RESOURCE_SINGLE_STORE_REQUIRED`, or preparation missing items:
+- `RESOURCE_ATTRIBUTES_NOT_READY`, `RESOURCE_SINGLE_STORE_REQUIRED`:
   report the explicit missing declaration; do not infer, reclassify or repair it locally.
-- `AUTHORIZATION_CUTOVER_NOT_READY` / `AUTHORIZATION_SUSPENDED`: report that activation/reads are
-  unavailable and the current preparation or pause status; do not fall back to the old model.
+- `AUTHORIZATION_SUSPENDED`: report the pause and refer the administrator to their operator.
 - `PARTITION_DOWNLOAD_REBUILD_REQUIRED` / `LEDGER_DOWNLOAD_REBUILD_REQUIRED`: the service cannot
   prove the old manifest's full scope. Prepare a new request with the explicitly intended scope.
 - A permission change during packaging alone does not fail construction. The owner may see safe

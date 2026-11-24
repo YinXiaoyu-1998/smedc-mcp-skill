@@ -35,8 +35,7 @@ copy of this skill; after a skill refresh, read the newly verified copy for its 
 
 Launcher `0.23.1` is published, independently verified, and approved for installation. The
 following current business-permission contract requires the matching service rollout and enabled
-organization authorization. New enterprises start enabled at operator onboarding. Older enterprises
-in preparation use the separate cutover process. Follow
+organization authorization. Organizations start enabled. Suspended reads require operator attention. Follow
 [business permissions and controlled management](references/business-authorization.md) when
 those tools are available. Permission checks always happen on the service; cached identity is
 not a permission card and does not authorize content.
@@ -82,7 +81,7 @@ it checks current tenant membership and admin role on every page/API, defaults t
 Developers share the verified entry with enterprise admins. Users configure through
 the UI rather than filling JSON. Existing enterprises reuse their rules for new accounts. JSON is
 an optional internal record only. Explicitly requested MCP management uses the current controlled tools;
-account creation stays with the operator, and saving configuration does not activate a tenant.
+employees joining an existing organization use operator provisioning. For new organizations, direct the person to [official registration](https://app.smedatacenter.xyz/register) when available. Only the person may enter their email, verification code and password. Never operate the registration UI, request codes or register through MCP.
 
 ## Update This Skill
 
