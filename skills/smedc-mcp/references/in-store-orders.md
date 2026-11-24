@@ -82,7 +82,7 @@ sufficient current clearance and a complete enterprise/store/category grant cove
 dimensions. Existing business/dishes grants do not include it. New categories start with no level
 and no grants; admins configure them through the existing
 [business authorization flow](business-authorization.md). Admin upload/management does not bypass
-ordinary reads. Legacy/preparing/suspended modes do not provide fallback content access.
+ordinary reads. Suspension denies affected content access.
 
 `describe_structured_dataset_coverage` — currently readable enterprise/store coverage:
 
