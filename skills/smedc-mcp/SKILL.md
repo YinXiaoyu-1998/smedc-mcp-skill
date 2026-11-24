@@ -126,7 +126,12 @@ For authorized store inspection questionnaires, evidence-backed answers, photo r
 template drafts, use the optional [`smedc-inspection` companion](#optional-companion-skills).
 The four inspection tools `query_inspections`, `manage_inspection_templates`,
 `write_inspections`, and `upload_inspection_photo` are bundled in the published and independently verified launcher
-`smedc-mcp-launcher@0.23.0`. Use the exact pin approved in this Skill for installation.
+`smedc-mcp-launcher@0.23.0`. Use the exact pin approved in this Skill for installation. The `create_active` and
+`create_draft` template actions require a connected launcher and service that expose them.
+Use `create_active` to validate, create and activate a finished template in one request,
+or use `create_draft` when the user asks to save a draft for review. The legacy `create`
+action saves a draft. If the formal creation action is unavailable, report that capability
+gap. Author questions with a title and components.
 
 Check the connected host for the tools required by the requested action, then verify live scope
 permission. `query_inspections` action `context` reports
