@@ -136,7 +136,7 @@ gap. Author questions with a title and components.
 For target-based creation, verify that the connected template exposes `targetType`. Use
 `query_employee_directory` to select a visible active employee in the current store or an
 active department in this enterprise. Send its `employeeUid` or `departmentId` to
-`write_inspections.create`; store templates need only the store scope. Repeated creation
+`write_inspections.create`; the selected store is the target for store templates. Repeated creation
 opens the existing active sheet for that template, store, date and target. Read the saved
 target in `query_inspections.sheet`.
 
