@@ -133,6 +133,13 @@ or use `create_draft` when the user asks to save a draft for review. The legacy 
 action saves a draft. If the formal creation action is unavailable, report that capability
 gap. Author questions with a title and components.
 
+For target-based creation, verify that the connected template exposes `targetType`. Use
+`query_employee_directory` to select a visible active employee in the current store or an
+active department in this enterprise. Send its `employeeUid` or `departmentId` to
+`write_inspections.create`; the selected store is the target for store templates. Repeated creation
+opens the existing active sheet for that template, store, date and target. Read the saved
+target in `query_inspections.sheet`.
+
 Check the connected host for the tools required by the requested action, then verify live scope
 permission. `query_inspections` action `context` reports
 `canReadInspections` and `canFillInspections` for the exact enterprise, store, and date;
