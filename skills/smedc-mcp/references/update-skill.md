@@ -71,7 +71,7 @@ listing is not an update failure when Git/HTTPS and the installation path are av
 
 ## Continue Within The Requested Scope
 
-This revision approves exactly `smedc-mcp-launcher@0.25.0`. Its three existing document/data
+This revision approves exactly `smedc-mcp-launcher@0.26.0`. Its three existing document/data
 upload tools (`upload_evidence_document`, `upload_structured_dataset`,
 `upload_quarantine_certificate`) stay visible but require an active admin. Preserve the
 `UPLOAD_ADMIN_REQUIRED` nonretryable handling and the before-file-access role check for those
@@ -79,7 +79,7 @@ tools when refreshing guidance; an update never grants upload permission or chan
 clearance. For a local inspection photo in `write_inspections`, verify current store fill
 permission before opening the file. Use the cutover branches only after the approved launcher
 and the matching service advertise them.
-The permission tools in launcher 0.25.0 require matching service rollout and enabled organization
+The permission tools in launcher 0.26.0 require matching service rollout and enabled organization
 authorization. Future revisions must supply their own verified exact pin.
 
 For a skill-only request, finish after the skill refresh and report the launcher separately as
