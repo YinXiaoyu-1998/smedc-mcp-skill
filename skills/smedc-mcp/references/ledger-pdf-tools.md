@@ -20,8 +20,9 @@ paths, binaries, or base64. Authentication determines organization and authoriza
 | `download_ledger_pdf_bundle` with `mode: "resume"` | `requestId`, `delivery` | none |
 
 Select `delivery: "local"` for verified local PDFs via the launcher or `delivery: "link"` for
-an employee ZIP link. HTTP MCP supports link delivery. Verify that the connected tool advertises
-the cutover input branches before using the table.
+an employee ZIP link. HTTP MCP supports link delivery. In the launcher, range and resume also
+accept optional `waitSeconds` (0–25, default 25). Verify that the connected tool advertises the
+cutover input branches before use.
 
 Date selection is exactly one of `dates: ["YYYY-MM-DD", ...]` or both `startDate` and `endDate`.
 Use real calendar dates, years 1000–9999. Ranges are ordered and include both endpoints.

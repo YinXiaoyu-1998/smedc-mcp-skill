@@ -466,8 +466,9 @@ derive one from the scope when omitted. Reuse it for identical retries after a l
   An `empty` delivery with a verified local manifest is a valid empty extract.
 - When the result is `queued` or `running`, save `requestId` and follow `retryAfterSeconds`.
   Use `{mode: "resume", requestId}` to continue delivery or `{mode: "status", requestId}`
-  to check progress. Send either branch with just the mode and request ID. Status has no files
-  or signing links, even when it reports `succeeded` or `empty`.
+  to check progress. ZIP range and resume accept optional `waitSeconds` (0–25, default 25).
+  Status takes only the mode and request ID and returns no files or signing links, even when
+  it reports `succeeded` or `empty`.
 - Check MCP `isError` and the result status. Treat `failed`, `partial_failed` or `expired`
   as unsuccessful delivery. Refresh a stale or expired request with a new key for the same
   authorized scope. Wait before retrying `PARTITION_DOWNLOAD_ACTIVE_LIMIT_EXCEEDED`.
