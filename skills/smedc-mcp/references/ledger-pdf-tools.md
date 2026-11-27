@@ -32,7 +32,7 @@ Only coverage may omit stores. The server caps each scope at **5,000 actual part
 infer that limit from the Cartesian product alone. Coverage pages contain at most **200** facts;
 return `nextCursor` unchanged with the same scope. The launcher gathers the status pages for
 one request. Coverage cursor length is 1–4,096 characters, request ID length 1–128, and idempotency
-key length 1–255.
+key length 1–128.
 
 Reuse an idempotency key only for the exact same operation and scope. For a changed scope or a
 new preparation after a terminal failure or stale bundle, use a new key. Do not reinterpret
