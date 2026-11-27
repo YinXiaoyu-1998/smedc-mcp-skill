@@ -27,10 +27,15 @@ zero and may explicitly overwrite an older value. Source flags such as “是否
 Recipe type retains the source text, including `全局（标准配方）` / `特定（例外配方）`;
 these examples are not an exhaustive two-value enum.
 
-One organization + enterprise + source namespace + SPU + SKU identifies a card. SKU alone
-and dish name alone are not unique. Each supplied card completely replaces its standard and
-exception recipes on a successful change; omitted cards stay unchanged. Last successful
-publication wins. Equal normalized content causes zero directory writes and zero CSV replacements.
+When the connected dataset registry exposes `store_name`, one organization + enterprise +
+source namespace + SPU + SKU + applicable store name identifies a card. Each applicable store
+gets its own card. A row listing multiple stores is included in each named store's card with its
+original store text. An empty applicable-store field goes to the enterprise-wide card. Existing
+unsplit cards retain their original CSVs and appear with an empty directory store. A successful
+change replaces the contents of the matching identity only. Omitted identities stay unchanged.
+If `store_name` is absent, the service still uses the earlier SPU/SKU identity and a separate
+store upload can overwrite a same-identity card. Equal normalized content causes zero directory
+writes and zero CSV replacements.
 Originals and import batches remain retained. A new successful upload restores an archived card,
 including identical content; replaying an old successful idempotency key does not restore it.
 Use a fresh key for a genuinely new upload, never to disguise a failed validation.
@@ -42,7 +47,8 @@ Skill's bounded polling schedule until `importBatch.status` is `applied`, `faile
 An immediate acceptance or exact replay can return safe asynchronous progress. Only an `applied`
 batch with current content-read permission exposes `importBatch.publicationSummary` in the receipt. It contains `inputCardCount`, `inputItemRowCount`,
 `counts`, `changes`, `changesTruncated`; readable `sourceSheetSummary` remains an array.
-The publication summary belongs to that committed batch: `inserted`, `updated`, `unchanged`,
+The publication summary belongs to that committed batch. `inputItemRowCount` counts original
+item rows. One original row can contribute to several store cards. `inserted`, `updated`, `unchanged`,
 `restored` counts are exact; `changes` is bounded by 100 entries / 32 KiB and
 `changesTruncated` marks omitted details. It contains field names, not old/new values or links.
 Status rechecks current content-read permission; an admin uploader may not see content counts
@@ -66,10 +72,10 @@ Use registry discovery, then call `query_structured_dataset` with this argument 
 The service selects detail mode automatically; `mode` is not a request parameter.
 It only queries the current authorized directory, with stable pagination
 (default 50 / maximum 200 rows), registered select/filter/sort fields and a fresh permission
-check per page. There is no server-side detail filtering or aggregation for items, recipes,
-quantities or applicable stores. Do those operations locally after CSV download.
+check per page. Filter by exact `store_name` where the registry exposes it. Use the CSV for
+item, recipe, quantity and original applicable-store-list detail.
 
-Directory fields are `cost_card_id`, `enterprise_name`, `source_namespace`, `spu_id`, `sku_id`,
+Directory fields are `cost_card_id`, `enterprise_name`, `source_namespace`, `spu_id`, `sku_id`, `store_name`,
 `dish_name`, `specification_name`, `base_category_name`, `sale_price`, `has_cost_card`,
 `source_dish_deleted`, `revision`, `source_document_id`, `import_batch_id`, `item_row_count`,
 `recipe_count`, `byte_size`, `csv_schema_version`. `sale_price` filter/output uses an exact
@@ -78,7 +84,7 @@ Internal object keys and business hashes are not directory fields.
 
 Name `eq`/`contains`/`starts_with` are literal controlled matches, with `%`, `_` and backslash
 escaped as data; no synonym or fuzzy identity inference. For the same name, return candidates
-with enterprise/source/SPU/SKU/specification and preserve ambiguity until the employee's scope
+with enterprise/source/SPU/SKU/store/specification and preserve ambiguity until the employee's scope
 or evidence identifies a card. Never merge or arbitrarily pick one. Coverage describes the
 current readable directory; source-document archive status does not hide active cards.
 Cost-card coverage uses `accessMode: "catalog_query"`, `metadataPolicy: "none"`, `cardCount`,
@@ -100,6 +106,11 @@ not original input totals. An optional exact `enterpriseName` narrows this reada
 | `specificationName` | Exact specification                              |
 | `baseCategoryName`  | Exact category                                   |
 
+To narrow by store, query `store_name` and pass the returned `costCardIds`. A selection with
+multiple cards sharing an enterprise/source/SPU/SKU requires the store-aware launcher and matching
+service. With the currently approved legacy launcher, issue separate requests for those IDs.
+The store-aware workspace candidate is `0.27.0`, pending publication and verification.
+
 Different fields combine with AND; values within an array combine with OR. Omitted selectors
 mean the currently authorized scope. No dates, store selectors, arbitrary API paths or SQL.
 Explicit IDs must all be active and readable or the entire request fails; condition-based
@@ -119,7 +130,8 @@ It contains `expiresAt`, `cardCount`, `totalItemRowCount`, `cards`; every card e
 `costCardId`, string `revision`, `enterpriseName`, `sourceNamespace`, `spuId`, `skuId`, `dishName`,
 `specificationName`, `schemaVersion`, `itemRowCount`, `byteSize`, `checksumSha256`,
 `sourceDocumentId`, `importBatchId`, plus `fileName`. Only the internal `presignedDownloadUrl`
-is removed. Zero cards returns `files: []` and a valid empty local manifest.
+is removed. Store-aware manifests also retain `storeName` on each entry. Zero cards returns
+`files: []` and a valid empty local manifest.
 The two source IDs belong to each card, never one shared batch source. They provide provenance,
 not permission to fetch the original. Do not put CSV bodies, base64 or signed URLs into model context.
 
