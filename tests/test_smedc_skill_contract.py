@@ -96,12 +96,13 @@ class SmedcSkillContractTests(unittest.TestCase):
                          "matched_product_name", "24 hours", "100", "32 KiB"]:
             with self.subTest(contract=contract):
                 self.assertIn(contract, guide)
-        self.assertIn("server-side detail filtering or aggregation", guide)
+        self.assertIn("Filter by exact `store_name`", guide)
+        self.assertIn("store-aware launcher and matching", guide)
         self.assertIn("not an upload template", guide)
         self.assertIn("entire batch", guide)
         self.assertIn("Explicit IDs", guide)
         self.assertIn("same name", guide)
-        for field in ["cost_card_id", "enterprise_name", "source_namespace", "spu_id", "sku_id",
+        for field in ["cost_card_id", "enterprise_name", "source_namespace", "spu_id", "sku_id", "store_name",
                       "dish_name", "specification_name", "base_category_name", "sale_price",
                       "has_cost_card", "source_dish_deleted", "revision", "source_document_id",
                       "import_batch_id", "item_row_count", "recipe_count", "byte_size", "csv_schema_version"]:
