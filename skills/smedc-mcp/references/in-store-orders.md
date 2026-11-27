@@ -6,6 +6,7 @@
 The approved installation pin is `0.25.0`. Historical launcher `0.14.0` used the legacy
 `settled_orders` name. Confirm matching service migration and current tenant authorization;
 static tools/list or successful login alone does not establish service or tenant readiness.
+The receipt and ZIP examples require the cutover launcher and matching service.
 
 ## Upload one complete source
 
@@ -51,12 +52,10 @@ uploads, without cross-dataset reconciliation.
 }
 ```
 
-Keep the returned `partitionImportJobId`; this is not an `importBatchId`.
-
-`get_partition_import_status` — replace the synthetic ID with the returned job ID:
+`query_jobs` — use the exact `jobRef` returned with the accepted upload:
 
 ```json
-{ "partitionImportJobId": "pi_synthetic_example" }
+{ "query": { "mode": "import_receipt", "jobRef": { "kind": "partition_import", "id": "pi_synthetic_example" } } }
 ```
 
 Follow the core Skill's bounded partition polling schedule, including the large-file schedule.
@@ -120,10 +119,12 @@ Optional ZIP requires independently confirmed matching service support. Follow t
 bundle limits and error recovery; prepare fixes an authorized manifest, while final link issuance
 rechecks current access and source revisions. Safe progress alone is not permission to download.
 
-`prepare_structured_partition_download` — same scope, stable preparation key:
+`download_structured_partitions` — request the same scope as a ZIP delivery:
 
 ```json
 {
+  "mode": "range",
+  "delivery": "bundle",
   "dataset": "in_store_orders",
   "enterpriseName": "合成企业",
   "startDate": "20261001",
@@ -133,19 +134,19 @@ rechecks current access and source revisions. Safe progress alone is not permiss
 }
 ```
 
-`get_structured_partition_download_status` — wait the returned `retryAfterSeconds` between checks:
+`download_structured_partitions` — request progress only:
 
 ```json
-{ "requestId": "pd_synthetic_example" }
+{ "mode": "status", "requestId": "pd_synthetic_example" }
 ```
 
-While `queued`/`running`, poll the returned request ID; `failed`/`expired` stop the flow.
-Only after `succeeded` use the final request-ID form, with no dataset/date/store selectors.
+If delivery is pending, retain the returned request ID and follow `retryAfterSeconds`.
+Stop and report failed or expired work. Delivery rechecks current access and source revisions.
 
-`download_structured_partitions` — succeeded prepared request only:
+`download_structured_partitions` — resume delivery without range selectors:
 
 ```json
-{ "requestId": "pd_synthetic_example" }
+{ "mode": "resume", "requestId": "pd_synthetic_example" }
 ```
 
 Both download forms return `localDirectory`, `dataset`, `partitionCount`, `totalRowCount` and

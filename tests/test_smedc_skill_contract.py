@@ -92,7 +92,7 @@ class SmedcSkillContractTests(unittest.TestCase):
         guide = read(SKILL_ROOT / "references" / "cost-cards.md")
         for contract in ["Launcher `0.25.0` is published and independently verified", "matching service rollout", "35", "38",
                          "query_structured_dataset", "download_cost_cards", "costCardIds",
-                         "sourceDocumentId", "importBatchId", "revision", "finally",
+                         "sourceDocumentId", "jobRef", "revision", "finally",
                          "matched_product_name", "24 hours", "100", "32 KiB"]:
             with self.subTest(contract=contract):
                 self.assertIn(contract, guide)
@@ -111,12 +111,12 @@ class SmedcSkillContractTests(unittest.TestCase):
         self.assertIn("group-level", guide)
         self.assertIn("no default grants", guide)
         self.assertIn("safe asynchronous", guide)
-        self.assertIn("Only an `applied` batch", guide)
+        self.assertIn("Only an `applied` batch", " ".join(guide.split()))
         self.assertIn("importBatch.publicationSummary", guide)
         self.assertIn("readable `sourceSheetSummary` remains an array", guide)
         for invariant in ["metadataPolicy: \"none\"", "selection is flat", "retryable 409",
                           "open or refresh the fixed category list",
-                          "get_import_status({importBatchId})", "cost_card_<costCardId>.csv",
+                          'query_jobs({query: {mode: "import_receipt", jobRef}})', "cost_card_<costCardId>.csv",
                           "archive_cost_card({costCardId})", "plus `fileName`", "Revoked access returns 404"]:
             self.assertIn(invariant, guide)
 
@@ -134,8 +134,17 @@ class SmedcSkillContractTests(unittest.TestCase):
         self.assertEqual("in_store_orders", upload["dataset"])
         self.assertEqual("path", upload["file"]["encoding"])
         self.assertNotIn("snapshotDate", upload)
-        self.assertEqual({"requestId": "pd_synthetic_example"}, examples[-1][1])
-        self.assertEqual("download_structured_partitions", examples[-1][0])
+        self.assertEqual(
+            ("query_jobs", {"query": {"mode": "import_receipt", "jobRef": {
+                "kind": "partition_import", "id": "pi_synthetic_example"
+            }}}),
+            examples[1],
+        )
+        bundle, status, resume = examples[-3:]
+        self.assertEqual("bundle", bundle[1]["delivery"])
+        self.assertEqual("range", bundle[1]["mode"])
+        self.assertEqual(("download_structured_partitions", {"mode": "status", "requestId": "pd_synthetic_example"}), status)
+        self.assertEqual(("download_structured_partitions", {"mode": "resume", "requestId": "pd_synthetic_example"}), resume)
         for state in ["待制作", "未结账", "已结账", "已撤单", "已退单"]:
             self.assertIn(state, guide)
         self.assertIn("Unknown source states and empty states", guide)
@@ -195,16 +204,13 @@ class SmedcSkillContractTests(unittest.TestCase):
         range_guide = section(self.skill_text, "Filtered Partition Range Downloads (Release Gated)")
         self.assertIn("`0.8.0`", range_guide)
         self.assertIn("`storeNameContains`", range_guide)
-        self.assertNotIn("prepare_structured_partition_download", range_guide)
-        self.assertNotIn("get_structured_partition_download_status", range_guide)
         guide = section(self.skill_text, "Optional Partition Bundle Downloads (Release Gated)")
-        for text in ["approved exact pin", "Launcher `0.25.0`", "published and independently verified",
-                     "server endpoints to be deployed", "prepare_structured_partition_download",
-                     "get_structured_partition_download_status", "retryAfterSeconds", "isError",
-                     "with only `requestId`", "does not wait for packaging", "1–128", "1–2000",
-                     "case-sensitive", "NFC", "failed", "expired", "valid empty local extract",
-                     "operator-only", "last consumer", "Range download is the default", "Tools/list alone cannot establish", "regenerate a saved"]:
-            self.assertIn(text, guide)
+        for contract in [
+            'mode: "range"', 'delivery: "bundle"', 'mode: "resume"', 'mode: "status"',
+            "idempotencyKey", "retryAfterSeconds", "isError", "failed", "expired",
+            "valid empty extract", "operator-only", "last consumer", "Range download is the default",
+        ]:
+            self.assertIn(contract, guide)
 
     def test_archive_tool_table_exposes_only_frozen_public_inputs(self) -> None:
         reference = read(SKILL_ROOT / "references" / "ledger-pdf-tools.md")
@@ -212,10 +218,9 @@ class SmedcSkillContractTests(unittest.TestCase):
                 for line in reference.splitlines() if line.startswith("| `")]
         self.assertEqual(rows, [
             "| `describe_ledger_pdf_coverage` | date selection | `storeNames`, `cursor` |",
-            "| `get_ledger_pdf_request_status` | `requestId` | `cursor` |",
-            "| `prepare_ledger_pdf_download` | `storeNames`, date selection, `idempotencyKey` | none |",
-            "| `download_ledger_pdf_bundle` | `requestId` | none |",
-            "| `get_ledger_pdf_download_url` | `requestId` | none |",
+            '| `download_ledger_pdf_bundle` with `mode: "range"` | `delivery`, `storeNames`, date selection | `idempotencyKey` |',
+            '| `download_ledger_pdf_bundle` with `mode: "status"` | `requestId` | none |',
+            '| `download_ledger_pdf_bundle` with `mode: "resume"` | `requestId`, `delivery` | none |',
         ])
 
     def test_archive_local_download_is_the_default_and_unrestricted_after_extraction(self) -> None:

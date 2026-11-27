@@ -12,13 +12,16 @@ unavailable. Do not generate PDFs locally or change service flags.
 All inputs are flat, strict objects. Do not send `orgId`, feature/force/renderer flags, filesystem
 paths, binaries, or base64. Authentication determines organization and authorization on the server.
 
-| Tool                            | Required input                                 | Optional input         |
-| ------------------------------- | ---------------------------------------------- | ---------------------- |
-| `describe_ledger_pdf_coverage`  | date selection                                 | `storeNames`, `cursor` |
-| `get_ledger_pdf_request_status` | `requestId`                                    | `cursor`               |
-| `prepare_ledger_pdf_download`   | `storeNames`, date selection, `idempotencyKey` | none                   |
-| `download_ledger_pdf_bundle`    | `requestId`                                    | none                   |
-| `get_ledger_pdf_download_url`   | `requestId`                                    | none                   |
+| Tool and mode | Required input | Optional input |
+| --- | --- | --- |
+| `describe_ledger_pdf_coverage` | date selection | `storeNames`, `cursor` |
+| `download_ledger_pdf_bundle` with `mode: "range"` | `delivery`, `storeNames`, date selection | `idempotencyKey` |
+| `download_ledger_pdf_bundle` with `mode: "status"` | `requestId` | none |
+| `download_ledger_pdf_bundle` with `mode: "resume"` | `requestId`, `delivery` | none |
+
+Select `delivery: "local"` for verified local PDFs via the launcher or `delivery: "link"` for
+an employee ZIP link. HTTP MCP supports link delivery. Verify that the connected tool advertises
+the cutover input branches before using the table.
 
 Date selection is exactly one of `dates: ["YYYY-MM-DD", ...]` or both `startDate` and `endDate`.
 Use real calendar dates, years 1000–9999. Ranges are ordered and include both endpoints.
@@ -26,9 +29,9 @@ An explicit array has 1–366 entries; a range spans at most 366 dates. `storeNa
 each nonblank and 1–512 characters; preserve each exact name, including surrounding whitespace.
 Only coverage may omit stores. The server caps each scope at **5,000 actual partitions**; do not
 infer that limit from the Cartesian product alone. Coverage pages contain at most **200** facts;
-return `nextCursor` unchanged with the same scope. Status also exposes `partitions` and
-`nextCursor`; follow continuations for the same request. Cursor length is 1–4,096 characters,
-request ID length 1–128, and idempotency key length 1–255.
+return `nextCursor` unchanged with the same scope. The launcher gathers the status pages for
+one request. Coverage cursor length is 1–4,096 characters, request ID length 1–128, and idempotency
+key length 1–255.
 
 Reuse an idempotency key only for the exact same operation and scope. For a changed scope or a
 new preparation after a terminal failure or stale bundle, use a new key. Do not reinterpret
@@ -36,32 +39,27 @@ idempotency conflicts as successful completion.
 
 ## Completion, Links And Authorization
 
-`prepare_ledger_pdf_download` packages readable existing PDFs; it does not render or repair
-missing/stale PDFs. The service automatically updates affected daily PDFs after applied ledger
+`download_ledger_pdf_bundle` with `mode: "range"` packages readable existing PDFs. The service automatically updates affected daily PDFs after applied ledger
 imports or successful photo changes. Employee agents cannot trigger generation, including admins.
 After uploads reach `applied`, confirm data ingestion and explain that the PDF will be available
 once its automatic update completes; use coverage to establish actual readiness. Keep internal
 scheduling details out of user-facing replies. Do not promise an immediate PDF, infer a fixed run
 time or a completion window such as “within 24 hours”, or repeatedly submit downloads to trigger it.
 Only quote a completion window when explicitly provided by the service. Internal operator CLI
-backfill/recovery is outside this employee MCP workflow. An accepted HTTP **202** response containing
-`requestId` and `status` is pending. Poll `get_ledger_pdf_request_status` while `queued` or
-`running`; terminal request statuses are `succeeded`, `partial_failed`, and `failed`. Inspect all
-returned partition pages before claiming complete success. A partition may be `empty` (no PDF),
-`failed`, or `superseded`; superseded generation is not successful fulfillment. Follow a returned
-latest request reference only when visible. Do not treat partial success as a complete archive.
+backfill/recovery is outside this employee MCP workflow.
 
-Status never returns download URLs or PDF bytes. When local delivery is available, call
-`download_ledger_pdf_bundle` for local files: the launcher resolves the signed link itself, verifies the archive,
-extracts the daily PDFs, and returns `localDirectory`. The extracted PDFs are ordinary
-deliverables — open them, quote them, forward them, or process them further as the employee asks.
+The range call can start packaging, wait, and deliver the selected output. If it returns `queued`
+or `running`, save `requestId` and follow `retryAfterSeconds`. Call `mode: "status"` with just
+the request ID to check progress, or return with `mode: "resume"` and the same selected delivery.
+Status only returns progress and partition outcomes. Check `partitions` for `empty`, `failed`
+and `superseded`. Report `partial_failed`, `failed` and `expired` explicitly. Use the visible
+latest request reference where the service returns one.
 
-If local delivery is unavailable or the employee wants a clickable download, call
-`get_ledger_pdf_download_url` and give the employee the fresh
-`downloadUrl` and its `expiresAt`. The employee opens the link. Do not fetch, proxy, cache, or
-extract the ZIP from the link, or emit archive bytes as base64. The link lasts up to **15 minutes**;
-the ZIP is retained **24 hours**. Request a fresh link if only the signature expired; prepare again
-with a new key if the ZIP expired or became stale.
+For link delivery, give the employee the fresh `downloadUrl` and its `expiresAt`.
+The employee opens the link. Do not fetch, proxy, cache, or extract the ZIP from the link, or
+emit archive bytes as base64. The link lasts up to **15 minutes** and the ZIP is retained
+**24 hours**. Resume with `delivery: "link"` if only the signature expired. Start a fresh range
+request with a new key if the ZIP expired or became stale.
 
 The service checks the employee's current finished-PDF authorization on coverage, status,
 preparation, and every URL issuance. Prior access or a completed request grants no continuing
@@ -71,8 +69,7 @@ whole published PDF.
 
 ## Local Bundle Download
 
-`download_ledger_pdf_bundle` takes only `requestId`. The launcher consumes the signed link
-internally and never returns it. It verifies the archive against the response `byteSize` and
+With `delivery: "local"`, the launcher consumes the signed link internally. It verifies the archive against the response `byteSize` and
 `checksumSha256`, extracts
 `<store>/<YYYY-MM-DD>/食品经营单位进货台帐_<store>_<YYYY-MM-DD>.pdf` entries, and returns
 `localDirectory`, `requestId`, `fileCount`, and relative `files[]`, with `manifest.json`
@@ -95,7 +92,7 @@ beside them.
 
 - `LEDGER_PDF_NOT_ENABLED`: non-retryable availability boundary; report that rollout is pending.
 - `LEDGER_DETAIL_DISABLED`: do not retry detail, old cursors, or original ledger signing. Use the
-  advertised aggregates or archive tools within the available capability.
+  authorized PDF archive tools within the available capability.
 - `LEDGER_PDF_NOT_READY`: report a pending automatic update and retry after readiness is established;
   preparation/download does not generate PDFs. Do not request an admin refresh or use another API
   to trigger rendering.
@@ -107,6 +104,6 @@ beside them.
 Raw `delivery_ledger` details, aggregates, source coverage and original CSV/XLSX signing are
 closed for every role. The readable dataset catalog omits it; this does not disable admin uploads.
 Use the connected `upload_structured_dataset` contract for original receipt uploads,
-`get_import_status` for application status, and `describe_ledger_pdf_coverage` for authorized PDF
-readiness. Other datasets are unaffected. This reference defines MCP use only; the
+`query_jobs` with `{query: {mode: "import_receipt", jobRef}}` for application status, and
+`describe_ledger_pdf_coverage` for authorized PDF readiness. Other datasets are unaffected. This reference defines MCP use only; the
 optional `smedc-delivery-ledger` companion owns upload/photo/scheduled-readiness/download coordination.

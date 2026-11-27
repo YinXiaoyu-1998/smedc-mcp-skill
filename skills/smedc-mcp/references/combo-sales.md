@@ -1,6 +1,6 @@
 # 手动维护套餐与读取子菜销售
 
-本流程使用已发布并独立验证的 launcher 0.25.0。按主 Skill 的已验证安装版本安装。使用前检查连接中的工具参数和服务支持：目录工具应提供 `workbookPath`，分区下载工具应提供 `combo_sales` 和 `comboAttribution`。缺少相应能力时向员工说明需要匹配的已发布客户端和服务。普通菜品目录行继续使用现有批量接口。
+本流程使用已发布并独立验证的 launcher 0.25.0。按主 Skill 的已验证安装版本安装。使用前检查连接中的工具参数和服务支持：目录工具应提供 `workbookPath`，分区下载工具应提供 `combo_sales` 和 `comboAttribution`。缺少相应能力时向员工说明需要匹配的已发布客户端和服务。导入回执需核实 launcher 与服务均支持本次切换后的参数。普通菜品目录行继续使用现有批量接口。
 
 | 员工想知道或维护什么                         | 取得什么数据                                                                                                                                                                                                              |
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -12,7 +12,7 @@
 ## 管理员手动录入
 
 - 两页菜品库用 `upsert_dish_catalog`，只传 `enterpriseName` 和原始 XLSX 的绝对 `workbookPath`。launcher 读取「总部菜品」和「总部套餐」，分批提交当前目录与组成。保存返回的批次数。遇到不唯一的 SKU 或失败批次，依据错误中的位置核对原表后重试。
-- 带规格的「套餐销售统计」用 `upload_structured_dataset`。指定 `dataset: combo_sales`、准确企业名、与表内单一营业日一致的 `startDate` 和 `endDate`（YYYYMMDD）、`idempotencyKey` 及原始 XLSX 的路径文件对象。使用按门店统计、显示规格、覆盖该门店日的完整明细。取得 `partitionImportJobId` 后，用 `get_partition_import_status` 查到 `published` 再读取。重试同一提交沿用同一幂等键，修订报表用新提交替换对应门店日。
+- 带规格的「套餐销售统计」用 `upload_structured_dataset`。指定 `dataset: combo_sales`、准确企业名、与表内单一营业日一致的 `startDate` 和 `endDate`（YYYYMMDD）、`idempotencyKey` 及原始 XLSX 的路径文件对象。使用按门店统计、显示规格、覆盖该门店日的完整明细。保存返回的 `jobRef`，用 `query_jobs({query: {mode: "import_receipt", jobRef}})` 查到 `published` 再读取。重试同一提交沿用同一幂等键，修订报表用新提交替换对应门店日。
 
 ## 按部门读取实际销售
 
