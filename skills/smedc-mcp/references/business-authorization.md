@@ -175,7 +175,8 @@ A suspension requires current administrator confirmation and a matching version.
 - A permission change during packaging alone does not fail construction. The owner may see safe
   progress; a succeeded job can still be denied a fresh link by current permissions. Status and
   management responses contain no content links. Do not report status success as download access.
-- `get_import_status` gives an active uploader safe document/import/processing IDs and statuses plus
+- The `query_jobs` `import_receipt` branch gives an active row uploader safe
+  document/import/processing IDs and statuses plus
   `hasValidationErrors`, even without content grants/clearance or during read suspension. It omits
   original filenames, storage keys, sheet/validation details, business dates, receipt IDs and row
   counts. Ordinary full metadata requires all current retained-source scopes and category clearance

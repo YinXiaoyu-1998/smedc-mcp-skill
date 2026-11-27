@@ -14,8 +14,21 @@ Kinds are `row_import`, `partition_import`, and `workflow_run`. Job summaries ar
 available through the original account or the current authorized workflow assignment, where applicable.
 The enabled organization authorization model and current administrator are required.
 
-Automated uploads pass the official `workflowAction` binding with the existing
-`upload_structured_dataset` request. The companion owns lease and action handling.
-Use the central association after a lost response. An accepted Job can still be queued,
-processing or terminally failed. Use its real status when recording a workflow receipt.
+## Structured Upload Receipts
+
+After verifying the launcher and service expose the cutover contract, save the `jobRef` returned
+by `upload_structured_dataset`. Query `{mode: "import_receipt", jobRef}` for that specific import.
+The receipt rechecks its own uploader and content authorization. History list, detail and workflow
+assignment continue to use their existing authorization rules.
+
+For a lost upload response, an authorized history caller can look up
+`{mode: "idempotency", kind, enterpriseKey, idempotencyKey}` using the original import kind,
+enterprise and key. For a workflow upload, pass the official `workflowAction` binding and use
+`mode: "action"` with the original workflow/run/action IDs to locate the linked job. Use its
+`{kind, id}` as the receipt reference when authorized. Where exact replay is supported, reuse
+the same key and unchanged file bytes and metadata to recover the original submission. The
+companion owns workflow leases and action handling.
+
+An accepted Job can still be queued, processing or terminally failed. Use its real status
+when recording a workflow receipt.
 For job metadata writes and closed-run corrections use the dedicated authorized management surface.

@@ -5,7 +5,8 @@
 `takeaway_orders` (平台外卖订单明细) is supported by published, independently verified
 launcher `0.25.0`, the approved exact installation pin. Confirm matching service deployment and
 current independent category grants. Package publication, static tools/list or successful login
-alone does not establish service or tenant readiness.
+alone does not establish service or tenant readiness. The receipt and ZIP examples require the
+cutover launcher and matching service.
 
 ## Upload and status
 
@@ -38,10 +39,15 @@ Dates declare the inclusive source business-date window (`YYYYMMDD`).
 The configured category level is authoritative. File bytes, credentials and internal links remain
 inside the launcher. Do not split by platform/hour/order, repair rows or fill missing values locally.
 
-`get_partition_import_status` — use the returned job ID:
+`query_jobs` — use the exact `jobRef` returned with the accepted upload:
 
 ```json
-{ "partitionImportJobId": "pi_synthetic_example" }
+{
+  "query": {
+    "mode": "import_receipt",
+    "jobRef": { "kind": "partition_import", "id": "pi_synthetic_example" }
+  }
+}
 ```
 
 Follow the core Skill's bounded partition polling schedule. Only `published` is success;
@@ -91,10 +97,12 @@ range limits and recovery. Check `isError`; failure does not mean zero orders.
 
 Optional ZIP requires confirmed target service support and the core Skill's existing bundle limits.
 
-`prepare_structured_partition_download` — prepare the same scope:
+`download_structured_partitions` — request the same scope as a ZIP delivery:
 
 ```json
 {
+  "mode": "range",
+  "delivery": "bundle",
   "dataset": "takeaway_orders",
   "enterpriseName": "合成企业",
   "startDate": "20261001",
@@ -104,19 +112,19 @@ Optional ZIP requires confirmed target service support and the core Skill's exis
 }
 ```
 
-`get_structured_partition_download_status` — poll with returned retryAfterSeconds:
+`download_structured_partitions` — request progress only:
 
 ```json
-{ "requestId": "pd_synthetic_example" }
+{ "mode": "status", "requestId": "pd_synthetic_example" }
 ```
 
-Only after `succeeded` use the request-ID form; `failed`/`expired` stop. Link issuance rechecks
-current complete authorization and source revisions; safe progress grants no content access.
+If delivery is pending, retain the returned request ID and follow `retryAfterSeconds`.
+Stop and report failed or expired work. Delivery rechecks current access and source revisions.
 
-`download_structured_partitions` — succeeded request, without range selectors:
+`download_structured_partitions` — resume delivery without range selectors:
 
 ```json
-{ "requestId": "pd_synthetic_example" }
+{ "mode": "resume", "requestId": "pd_synthetic_example" }
 ```
 
 The launcher verifies scope, file count, bytes/checksums and safe ZIP paths before returning

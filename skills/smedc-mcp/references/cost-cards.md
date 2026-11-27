@@ -6,6 +6,7 @@ Launcher `0.25.0` is published and independently verified and approved for insta
 Install or update only through the core Skill's exact pinned procedure. Before cost-card use,
 verify the matching service rollout and explicit tenant category configuration; publication,
 installation and static discovery alone do not establish live service or tenant readiness.
+The receipt workflow below requires the cutover launcher and matching service.
 
 ## Upload the original
 
@@ -34,12 +35,12 @@ Originals and import batches remain retained. A new successful upload restores a
 including identical content; replaying an old successful idempotency key does not restore it.
 Use a fresh key for a genuinely new upload, never to disguise a failed validation.
 
-Keep the returned `importBatchId` and use `get_import_status({importBatchId})`, not partition-import
-status. The outer response is `{document, processing, importBatch}`; follow the core Skill's
-bounded polling schedule until `importBatch.status` is `applied`, `failed` or `rejected`.
-Upload and exact replay return safe asynchronous progress only, without `publicationSummary` or raw storage keys; an accepted/queued response is
-not publication success. Only an `applied` batch with current content-read permission exposes
-`importBatch.publicationSummary` in import status. It contains `inputCardCount`, `inputItemRowCount`,
+Keep the returned `jobRef` of kind `row_import` and use
+`query_jobs({query: {mode: "import_receipt", jobRef}})`. The receipt includes `jobRef` and the
+structured import status views `document`, `processing` and `importBatch`. Follow the core
+Skill's bounded polling schedule until `importBatch.status` is `applied`, `failed` or `rejected`.
+An immediate acceptance or exact replay can return safe asynchronous progress. Only an `applied`
+batch with current content-read permission exposes `importBatch.publicationSummary` in the receipt. It contains `inputCardCount`, `inputItemRowCount`,
 `counts`, `changes`, `changesTruncated`; readable `sourceSheetSummary` remains an array.
 The publication summary belongs to that committed batch: `inserted`, `updated`, `unchanged`,
 `restored` counts are exact; `changes` is bounded by 100 entries / 32 KiB and

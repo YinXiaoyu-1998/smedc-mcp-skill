@@ -40,10 +40,12 @@ organization authorization. Organizations start enabled. Suspended reads require
 those tools are available. Permission checks always happen on the service; cached identity is
 not a permission card and does not authorize content.
 
-Launcher `0.25.0` exposes 59 tools, including `query_combo_sale_mappings` and `update_combo_sale_mapping` for store-specific confirmations, `query_jobs` for central Job history, and
-`download_ledger_pdf_bundle` for local ledger PDFs.
-After upgrading, reload the MCP host and verify the new tools through its native connection.
-If the launcher and service contracts disagree, report the version mismatch to the operator.
+The #393 cutover combines downloads, import receipts and inspection photos in a 51-tool launcher
+directory. The currently approved `0.25.0` pin has the preceding 59-tool directory. Use the cutover
+workflows below only when an officially approved launcher and the matching service expose the new
+input branches. After an authorized upgrade, reload the MCP host and verify the 51 tools and
+required branches through its native connection. If the branch is missing or the launcher and
+service disagree, report the capability or version gap to the operator.
 
 ## Employee And Business Directories (Published Launcher, Service Gated)
 
@@ -120,13 +122,12 @@ private migration. The approved `0.25.0` launcher includes the workflow contract
 service capability and current authorization before setup or execution. Installation does not
 activate workflows or migrate existing tasks.
 
-## Inspection Questionnaires (Launcher 0.25.0)
+## Inspection Questionnaires
 
 For authorized store inspection questionnaires, evidence-backed answers, photo references, or
 template drafts, use the optional [`smedc-inspection` companion](#optional-companion-skills).
-The four inspection tools `query_inspections`, `manage_inspection_templates`,
-`write_inspections`, and `upload_inspection_photo` are bundled in the published and independently verified launcher
-`smedc-mcp-launcher@0.25.0`. Use the exact pin approved in this Skill for installation. The `create_active` and
+The inspection tools are `query_inspections`, `manage_inspection_templates` and `write_inspections`.
+Use the exact launcher pin approved in this Skill for installation. The `create_active` and
 `create_draft` template actions require a connected launcher and service that expose them.
 Use `create_active` to validate, create and activate a finished template in one request,
 or use `create_draft` when the user asks to save a draft for review. The legacy `create`
@@ -150,15 +151,13 @@ authorization, or release. If a tool, service capability, or current target perm
 report the specific gap. Use the launcher for Agent operations. Employees can fill authorized sheets
 in the Web UI when their local original cannot be read by the launcher.
 
-`upload_inspection_photo` is an inspection photo upload gated by current store fill
-(`canFillInspections`) permission in the exact scope, not by the `admin` role. An ordinary
-`employee` with that grant may upload one original JPEG/PNG through the launcher; an admin
-without the grant may not. The launcher verifies the exact fill preflight and reads an absolute
-local path, and the service rechecks permission and the actual bytes. A successful upload returns
-`photoId` and `expiresAt`; do not poll `get_import_status` for it. This photo surface
-is not one of the admin-only document uploads below. The companion owns sheet selection, evidence,
-photo references, retries, and template drafts; this base skill owns installation, login,
-availability, and permission checks.
+To attach one or more local originals in the same call, use `write_inspections` with
+`command.action: "patch"` and the `appendLocalPhotos` change. Use `command.action: "stage_photo"`
+when the employee needs a reusable reference before binding it. These local path branches require
+the cutover launcher. The launcher verifies the exact current store/date fill grant before reading
+an absolute JPEG/PNG path, and the service rechecks authorization and the bytes. An employee with
+that grant can attach photos. A staged `photoId` is reusable within the same store and date until
+`expiresAt`. Use the companion for target selection, per-sheet results and recovery after a conflict.
 
 ## Optional Companion Skills
 
@@ -266,8 +265,8 @@ For the three existing document/data upload tools — `upload_evidence_document`
 `upload_quarantine_certificate` — only active accounts with role `admin` may upload. These three
 tools remain visible and are marked admin-only; do not dynamically hide or remove them.
 `upsert_dish_catalog` also requires the admin role but is not an upload tool.
-`upload_inspection_photo` is not covered by this section: when the inspection tools are
-present, that photo upload is gated by current store fill permission (see Inspection Questionnaires).
+Inspection photo staging and attachment use the current store fill grant
+(see Inspection Questionnaires).
 
 Before handling one of these three uploads, resolve an unknown role with
 `smedc_get_current_user`. For a known `employee` role, do not read or transform the local file,
@@ -348,40 +347,29 @@ subject to the ordinary 50 MiB service ceiling and much smaller host tool-argume
 
 ## Upload Completion And Status Polling
 
-Treat every text/evidence or row-query structured-table upload response with HTTP `202` as accepted
-for background processing, not as a completed upload. Keep the returned `documentId`; for a
-row-query structured upload also keep `importBatchId`. Poll `get_evidence_document_status` or
-`get_import_status` after
-**2 seconds, then 5 seconds, then 10 seconds, then every 15 seconds**, for at most **10 minutes**.
+An evidence upload accepted for processing returns `documentId`. Use
+`get_evidence_document_status` and report completion at `active/ready`.
 
-- Tell the employee an upload succeeded only after its terminal success state: evidence is
-  `active/ready`; a structured import is `importBatch.status=applied` (with the returned document
-  and processing views complete). Never call a queued/pending response successful.
-- On terminal `rejected` or `failed`, summarize only safe tool-returned errors and give correction
-  advice, usually by asking the employee for a corrected source file or metadata. Do not silently
-  rewrite and re-upload the file yourself. Never expose internal exceptions, stacks, credentials,
-  or infrastructure details.
-- At 10 minutes with no terminal state, report **still processing**, include the Document and
-  ImportBatch IDs when present, and say the employee can check later with the corresponding status
-  tool. This is not a failure.
-- Do not re-upload instead of polling. Upload retries must follow idempotency rules: reuse a
-  structured idempotency key only for the exact same file bytes and metadata; use a new key only
-  after the employee intentionally corrects or changes the upload.
+A structured upload returns `jobRef` when accepted. Pass that reference unchanged to
+`query_jobs` with `{query: {mode: "import_receipt", jobRef}}`. The reference kind is
+`row_import` or `partition_import`. The cutover upload can set `waitForResult: true` for a
+bounded wait. Omit it or use `false` for immediate acceptance, then check any pending job
+through its receipt. Use the [Job reference](references/job-history.md) for lost-response recovery.
 
-`upsert_dish_catalog` is a synchronous write: it returns the batch counters directly and never
-creates a document or import batch, so do not poll `get_import_status` for it. Treat a transport
-timeout or dropped connection as an unknown result and re-read the current rows before replaying.
+- For evidence and structured sources up to 50 MiB, query after **2 seconds, then 5 seconds,
+  then 10 seconds, then every 15 seconds**, with a **10-minute** tracking limit. For partition
+  sources over 50 MiB, check after **2 minutes** and every **2 minutes** for up to **20 minutes**.
+  Tell the employee once about the large-file window and use passive waits when supported.
+- Report structured success at `importBatch.status=applied` for a row import or `published`
+  for a partition import. `queued` and `processing` stay pending.
+  `rejected`, `failed`, `cancelled` and `expired` are terminal non-success when returned.
+- Report safe service errors or source validation locations. At the tracking limit, say the
+  request is still processing and keep the document ID or typed `jobRef` for later checks.
+- Reuse the same upload key only for identical bytes and metadata. Give corrected uploads a
+  fresh key. Poll a known receipt and use exact replay only to recover an unknown submission.
 
-For `business`, `dishes`, `in_store_orders` and release-gated `takeaway_orders`, keep `partitionImportJobId` and poll
-`get_partition_import_status`. For a source file larger than 50 MiB, check first after 2 minutes,
-then every 2 minutes, for at most 20 minutes; this replaces the ordinary polling schedule above.
-Tell the employee once that large-file processing may take 10–20 minutes, then use a passive wait
-when the host provides one. Do not narrate unchanged `queued` or `processing` states between
-checks. For a source file at or below 50 MiB, use the ordinary polling schedule above.
-`published` is the only success state;
-`rejected`, `failed`, `cancelled`, and `expired` are terminal non-success states. A `queued` or
-`processing` response is not complete. Exact-repeat uploads may return the existing published job;
-same-key requests with different bytes or metadata are conflicts, not retries.
+`upsert_dish_catalog` is synchronous and returns counters. After a transport timeout or
+dropped connection, re-read the current rows before replaying.
 
 ## In-Store Orders (Published, Service Gated)
 
@@ -417,8 +405,8 @@ to split, rewrite, convert, or Base64-encode it.
   If any row or partition fails, nothing from that source replaces live data. On success, matching
   organization + enterprise + dataset + store + date partitions replace prior content, including
   the category authorization metadata.
-- Keep `partitionImportJobId` and follow the partition status polling rules above. Do not query or
-  download from a job until its status is `published`.
+- Keep the returned partition `jobRef` and follow the receipt polling rules above. Read or
+  download the new store-day data once the import is `published`.
 - `query_structured_dataset` is not available for these datasets and returns
   `DATASET_REQUIRES_PARTITION_EXTRACT`. Use `describe_structured_dataset_coverage`, then call
   `download_structured_partitions` with `dataset`, the exact coverage `enterpriseName`, inclusive
@@ -463,63 +451,37 @@ from this skill.
 
 ## Optional Partition Bundle Downloads (Release Gated)
 
-Range download is the default. Select bundle mode explicitly only when its matching service
-deployment is known available. Tools/list alone cannot establish that availability because
-launcher contracts are statically registered. If ZIP support is removed, regenerate a saved
-plan in range mode; never silently bypass authentication, integrity or source-scope failures.
-Launcher `0.25.0` is published and independently verified and is the approved exact pin. The
-prepare/status/requestId flow below also requires matching server endpoints to be deployed.
-Branch code or server recommended-version metadata alone does not establish that deployment.
-If the matching deployment is unavailable, use only the range contract supported by the
-connected service; do not send unsupported arguments or invent missing tools. Discover the
-connected host's tools before invoking this flow.
+Range download is the default. Select ZIP delivery when the connected launcher and service support
+the cutover contract. `tools/list` alone cannot establish matching deployment. If ZIP support is
+unavailable, regenerate a saved plan in supported direct range mode.
 
-For `business` and `dishes`, coverage accepts `dataset`, optional `enterpriseName`, and optional
-`storeNameContains`. Apply the same enterprise/store scope to coverage and every download.
-`storeNameContains` is 1–20 NFC-normalized, trimmed strings, each 1–255 characters: literal,
-case-sensitive substring matching, OR within the array, AND with merchant IDs and backend
-authorization. Empty arrays and blank entries are invalid. Use service-returned `storeIds`;
-never guess merchant IDs or silently exclude stores. Filtered coverage and manifests describe
-only currently readable matching partitions, not completeness or hidden stores.
+Call `download_structured_partitions` with `mode: "range"`, `delivery: "bundle"` and the same
+authorized dataset, enterprise, date and store scope as the direct form above. ZIP allows up to
+2,000 `storeIds` and does not accept `comboAttribution`. Preserve a stable `idempotencyKey`
+(1–128 characters, no surrounding whitespace) with the scope before submission; the launcher can
+derive one from the scope when omitted. Reuse it for identical retries after a lost response.
 
-1. Call `prepare_structured_partition_download` with `dataset` (`business` or `dishes`), exact
-   `enterpriseName`, inclusive `startDate`/`endDate` in `YYYYMMDD`, and `idempotencyKey`
-   (1–128 characters, no surrounding whitespace). Optional inputs are `storeIds` (1–2000 IDs)
-   and `storeNameContains`. Reuse a key only for the exact same scope; a changed scope needs
-   another key. Keep the returned `requestId`, `status`, counts and `retryAfterSeconds`.
-2. While `queued` or `running`, wait the returned `retryAfterSeconds`, then call
-   `get_structured_partition_download_status` with only `requestId`. It also reports
-   `completedPartitionCount`, `totalRowCount`, `totalByteSize`, `errorCode` and `expiresAt`.
-   Check MCP `isError` as well as the status. `failed` and `expired` are terminal failures;
-   neither pending nor failed responses mean no data. Do not continue into analysis on failure.
-3. Only after `succeeded`, call `download_structured_partitions` with only `requestId`.
-   It cannot be combined with any dataset/date/store selector and does not wait for packaging.
-   The alternate range form requires `dataset`, `enterpriseName`, `startDate`, `endDate`, with
-   optional `storeIds` (at most 10,000) and `storeNameContains`. The launcher consumes ZIP URLs
-   internally and verifies local files; return/use `localDirectory`, counts and `files[]`, never
-   signing URLs. Row/byte totals may be decimal strings; preserve their precision. Successful zero results have no ZIP URL and yield a valid empty local extract.
+- Use the returned `localDirectory`, counts and `files[]` for delivered data. The launcher
+  verifies files and uses signing URLs internally. Row and byte counts may be decimal strings.
+  An `empty` delivery with a verified local manifest is a valid empty extract.
+- When the result is `queued` or `running`, save `requestId` and follow `retryAfterSeconds`.
+  Use `{mode: "resume", requestId}` to continue delivery or `{mode: "status", requestId}`
+  to check progress. ZIP range and resume accept optional `waitSeconds` (0–25, default 25).
+  Status takes only the mode and request ID and returns no files or signing links, even when
+  it reports `succeeded` or `empty`.
+- Check MCP `isError` and the result status. Treat `failed`, `partial_failed` or `expired`
+  as unsuccessful delivery. Refresh a stale or expired request with a new key for the same
+  authorized scope. Wait before retrying `PARTITION_DOWNLOAD_ACTIVE_LIMIT_EXCEEDED`.
+  For timeouts and `PARTITION_DOWNLOAD_LIMIT_EXCEEDED`, replace the failed batch with narrower
+  date ranges. For a one-day failure, ask for a narrower store scope.
 
 Default bundle limits are 500 partitions and 256 MiB raw bytes, with 24-hour retention and
-signing URLs valid for at most 15 minutes. Active packaging limits default to 16 per organization
-and 4 per requester. For `PARTITION_DOWNLOAD_ACTIVE_LIMIT_EXCEEDED`, wait before retrying;
-for `PARTITION_DOWNLOAD_NOT_READY`, resume status polling. For timeout or
-`PARTITION_DOWNLOAD_LIMIT_EXCEEDED`, narrow/split the date window and replace the failed batch;
-never include both a failed parent and its replacement children. If one day still exceeds the
-limit, ask for a narrower store scope. For forbidden/not-found results, do not infer hidden data;
-for stale/expired requests, prepare a fresh authorized scope with a new key. Preserve a local
-scope check: a returned store outside the requested literals is an error, never silently filtered.
+signing URLs valid for up to 15 minutes. Active limits default to 16 per organization and 4 per
+requester. API and transfer-stall bounds are 30 seconds and the launcher download budget is 240
+seconds per call. Cancellation stops transfer retries.
 
-In this gated workflow, prepare/status API calls have a 30-second deadline and refresh a
-rejected access token once while retaining the preparation key. Repeated authentication failure
-requires the normal sign-in recovery. Downloads have a 240-second invocation budget; multipart
-uploads retain their progressing-upload duration, with 30-second API and transfer-stall bounds.
-Cancellation stops transfer retries; failed/cancelled uploads attempt session cleanup using a
-separate bounded request.
-
-The consuming workflow owns scratch cleanup. Shared downloads remain until the last consumer
-releases them through its shared index; never directly delete another consumer's directory.
-Service data cleanup is operator-only and is not an employee MCP tool, including for admins.
-Do not run operator cleanup commands or dataset repair from this base skill.
+The consuming workflow owns scratch cleanup. Shared downloads remain until their last consumer
+releases them through the shared index. Service data cleanup is operator-only.
 
 ## Combo composition, sales and store confirmations
 
@@ -671,18 +633,17 @@ Do not send `startDate` or `endDate`.
   including for admins and older clients. Use the finished PDF workflow only; do not try old
   aggregate selectors or feature flags. Read
   [ledger PDF tool contracts](references/ledger-pdf-tools.md) for archive parameters and errors.
-- After the matching service and launcher release are verified, use `download_ledger_pdf_bundle`
-  (launcher 0.20.0+) when the employee wants the files locally. The launcher verifies and extracts
-  the ZIP. The extracted PDFs are ordinary deliverables. To provide a clickable link, call
-  `get_ledger_pdf_download_url` and give it to the employee to open. Do not fetch or extract the
-  ZIP from that link yourself.
+- After verifying cutover support, call `download_ledger_pdf_bundle` with the selected date/store
+  range and `delivery: "local"` for verified local PDFs or `delivery: "link"` for a clickable
+  ZIP link to give the employee. The extracted PDFs are ordinary deliverables. For pending
+  requests, use the same tool to check progress or resume the selected delivery.
 - `supplier_catalog` is the current supplier snapshot used for delivery-ledger enrichment. Upload
   the provided supplier catalog file as-is; do not rewrite it locally to match registry metadata.
   The service validates required and optional columns after upload. The latest successfully applied
   snapshot is current; older history is not a fallback, and an in-progress, failed, or rejected
   upload cannot replace it.
-- Keep the returned `importBatchId` and poll `get_import_status` until
-  `importBatch.status=applied` before querying. A queued or pending response is not success.
+- Keep the returned row `jobRef` and follow the receipt polling rules above until
+  `importBatch.status=applied`.
 - For `delivery_ledger`, successful application confirms data ingestion, not PDF completion. The
   service automatically updates affected daily PDFs after receipt or photo changes. Employee agents,
   including admins, cannot trigger generation through MCP or HTTP. Report pending automatic updates
