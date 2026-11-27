@@ -12,12 +12,12 @@ unavailable. Do not generate PDFs locally or change service flags.
 All inputs are flat, strict objects. Do not send `orgId`, feature/force/renderer flags, filesystem
 paths, binaries, or base64. Authentication determines organization and authorization on the server.
 
-| Tool and mode | Required input | Optional input |
-| --- | --- | --- |
-| `describe_ledger_pdf_coverage` | date selection | `storeNames`, `cursor` |
-| `download_ledger_pdf_bundle` with `mode: "range"` | `delivery`, `storeNames`, date selection | `idempotencyKey` |
-| `download_ledger_pdf_bundle` with `mode: "status"` | `requestId` | none |
-| `download_ledger_pdf_bundle` with `mode: "resume"` | `requestId`, `delivery` | none |
+| Tool and mode                                      | Required input                           | Optional input         |
+| -------------------------------------------------- | ---------------------------------------- | ---------------------- |
+| `describe_ledger_pdf_coverage`                     | date selection                           | `storeNames`, `cursor` |
+| `download_ledger_pdf_bundle` with `mode: "range"`  | `delivery`, `storeNames`, date selection | `idempotencyKey`       |
+| `download_ledger_pdf_bundle` with `mode: "status"` | `requestId`                              | none                   |
+| `download_ledger_pdf_bundle` with `mode: "resume"` | `requestId`, `delivery`                  | none                   |
 
 Select `delivery: "local"` for verified local PDFs via the launcher or `delivery: "link"` for
 an employee ZIP link. HTTP MCP supports link delivery. In the launcher, range and resume also

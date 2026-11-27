@@ -42,7 +42,12 @@ inside the launcher. Do not split by platform/hour/order, repair rows or fill mi
 `query_jobs` — use the exact `jobRef` returned with the accepted upload:
 
 ```json
-{ "query": { "mode": "import_receipt", "jobRef": { "kind": "partition_import", "id": "pi_synthetic_example" } } }
+{
+  "query": {
+    "mode": "import_receipt",
+    "jobRef": { "kind": "partition_import", "id": "pi_synthetic_example" }
+  }
+}
 ```
 
 Follow the core Skill's bounded partition polling schedule. Only `published` is success;

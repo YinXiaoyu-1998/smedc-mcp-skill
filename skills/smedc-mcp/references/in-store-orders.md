@@ -55,7 +55,12 @@ uploads, without cross-dataset reconciliation.
 `query_jobs` — use the exact `jobRef` returned with the accepted upload:
 
 ```json
-{ "query": { "mode": "import_receipt", "jobRef": { "kind": "partition_import", "id": "pi_synthetic_example" } } }
+{
+  "query": {
+    "mode": "import_receipt",
+    "jobRef": { "kind": "partition_import", "id": "pi_synthetic_example" }
+  }
+}
 ```
 
 Follow the core Skill's bounded partition polling schedule, including the large-file schedule.
